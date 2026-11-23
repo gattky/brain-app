@@ -488,7 +488,7 @@
         <div class="sub measure-desc" id="measureDesc"></div>
         <div class="timer" id="measureTimer">--</div>
         <div class="sub" id="measureSub" data-i18n="measureConnecting">Museと接続しています</div>
-        <div class="signal-check" id="signalCheck"><div id="signalTable"></div><div class="sc-hint" id="signalHint"></div><div class="art-stage" id="artStage"><img id="artImgA" alt=""><img id="artImgB" alt=""></div><div class="sc-hint" id="signalBattery"></div>
+        <div class="signal-check" id="signalCheck"><div id="signalTable"></div><div class="sc-hint" id="signalHint"></div><div class="art-stage" id="artStage"><img id="artImgA" alt=""><img id="artImgB" alt=""></div><div class="sc-hint" id="artCaption" data-i18n="artCaption" style="margin-top:0;"></div><div class="sc-hint" id="signalBattery"></div>
           <button type="button" class="purpose-chip" id="waveToggle" style="font-size:12.5px; padding:6px 14px; margin:10px 0;" onclick="toggleWave()"></button>
           <div id="waveWrap"><canvas id="signalWave" width="760" height="380"></canvas>
           <div class="sc-hint" id="waveScale"></div></div></div>
@@ -655,6 +655,7 @@ const I18N = {
     batteryNow: (n) => `Museの電池: ${n}%`,
     batteryLow: (n) => `Museの電池が少なくなっています(${n}%)。電池が少ないと、信号が乱れることがあります。充電(3時間以上)してから測ってください。`,
     checkWaiting: '波形を受け取っています…',
+    artCaption: '脳が活性化すると、サヴォア邸も活性化します。',
     checkEars: '額（AF7・AF8）は良好です。耳の後ろ（TP9・TP10）は肌に触れていません。アームの先端を、髪をよけて耳の後ろの肌に当て直してください。このアプリの判定は額を使うので、このまま進めても測れます。',
     checkHuge: '信号が大きすぎます(測れる幅いっぱいです)。電極が肌に触れていない可能性があります。装着し直して、額と耳の後ろの電極を肌にしっかり当ててください。',
     waveShow: '波形を見る', waveHide: '波形を隠す',
@@ -837,6 +838,7 @@ const I18N = {
     batteryNow: (n) => `Muse battery: ${n}%`,
     batteryLow: (n) => `The Muse battery is low (${n}%). A low battery can make the signal erratic. Charge it (3 hours or more) before measuring.`,
     checkWaiting: 'Receiving the signal…',
+    artCaption: 'When your brain becomes more active, Villa Savoye becomes more active too.',
     checkEars: 'Forehead (AF7/AF8) is good. Behind the ears (TP9/TP10) is not touching the skin. Move the arm tips aside from the hair and press them against the skin behind the ears. This app decides from the forehead, so you can continue as is.',
     checkHuge: 'The signal is far too large (at the limit of the measurable range). The electrodes may not be touching the skin. Refit the device and press the electrodes on the forehead and behind the ears firmly against the skin.',
     waveShow: 'Show waveform', waveHide: 'Hide waveform',
