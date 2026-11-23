@@ -322,7 +322,7 @@
       </div>
       <div class="phone">
         <div class="placeholder photo-hero">
-          <img src="img/eeg-hero.jpg" alt="EEGキャップを装着した測定の様子">
+          <img src="eeg-hero.jpg" alt="EEGキャップを装着した測定の様子">
           <svg class="wave-overlay" viewBox="0 0 260 340" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="0">
@@ -363,7 +363,6 @@
         <li data-i18n="introHigh"></li>
         <li data-i18n="introLow"></li>
         <li class="mi-small" data-i18n="introLimit"></li>
-        <li class="mi-gap" data-i18n="introPurpose"></li>
       </ul>
     </div>
 
@@ -374,7 +373,7 @@
         <div class="supp-num">01</div>
         <div class="supp-body">
           <h4 data-i18n="supp1h">「なんとなく良い」を、検証できる設計仮説に変えられる</h4>
-          <p data-i18n-html="supp1p">従来：「このくらい窓を大きくした方が開放的だろう」という建築家の経験・直感から決める。EEGを使う場合：「窓を大きくすると、本当にこの人の開放感や快適性に変化があるのか？」という検証可能な問いになる。</p>
+          <p data-i18n-html="supp1p">従来：「このくらい窓を大きくした方が開放的だろう」という建築家の経験・直感から決める。<br>EEGを使う場合：「窓を大きくすると、本当にこの人の開放感や快適性に変化があるのか？」という検証可能な問いになる。</p>
         </div>
       </div>
 
@@ -399,7 +398,7 @@
         <div class="supp-body">
           <h4 data-i18n="supp4h">莫大な費用のかかる建築空間を、出来上がる前に検証できる</h4>
           <p data-i18n-html="supp4p">従来：建築は、一度つくってしまうと簡単には変えられない。設計段階では、図面・CG・模型などから空間を想像して判断する。<br>
-          Our Approach：VRやパースなどのデジタル空間を使い、実際に建築をつくる前に、人がその空間をどう感じるかを検証する。</p>
+          EEGを使う場合：VRやパースなどのデジタル空間を使い、実際に建築をつくる前に、人がその空間をどう感じるかを検証する。</p>
         </div>
       </div>
 
@@ -407,7 +406,7 @@
         <div class="supp-num">05</div>
         <div class="supp-body">
           <h4 data-i18n="supp5h">「この建築家ならこうする」から「この人に対してこうする」へ</h4>
-          <p data-i18n-html="supp5p">パーソナライズができる。例えば同じ住宅でも、Person A：大きな窓 → 開放感↑/Comfort↑、Person B：大きな窓 → 開放感↑/Comfort↓ だったら、「大きな窓が良い住宅」という一般論ではなく、<b>このクライアントにとって何が心地よいか</b>を探索できる。</p>
+          <p data-i18n-html="supp5p">パーソナライズができる。例えば同じ住宅でも、<br>Person A：大きな窓 → 開放感↑/Comfort↑<br>Person B：大きな窓 → 開放感↑/Comfort↓<br>だったら、「大きな窓が良い住宅」という一般論ではなく、<b>このクライアントにとって何が心地よいか</b>を探索できる。</p>
         </div>
       </div>
 
@@ -618,15 +617,15 @@ const I18N = {
     ctaMeasure: '脳波を測定する →',
     suppTitle: 'EEGを設計者が使うと、何が変わるか',
     supp1h: '「なんとなく良い」を、検証できる設計仮説に変えられる',
-    supp1p: '従来：「このくらい窓を大きくした方が開放的だろう」という建築家の経験・直感から決める。EEGを使う場合：「窓を大きくすると、本当にこの人の開放感や快適性に変化があるのか？」という検証可能な問いになる。',
+    supp1p: '従来：「このくらい窓を大きくした方が開放的だろう」という建築家の経験・直感から決める。<br>EEGを使う場合：「窓を大きくすると、本当にこの人の開放感や快適性に変化があるのか？」という検証可能な問いになる。',
     supp2h: '「見た目が良い」以外の判断材料が増える',
     supp2p: '建築では、最終的に美しい・かっこいい・バランスがいい・開放的・ミニマル・素材感がいい、など視覚的・言語的な評価が中心になりやすい。でも実際に人が空間を体験すると、落ち着く・緊張する・情報量が多い・視線が吸い寄せられる・なんとなく居続けたい・なぜか好き・逆に理由は分からないけれど居心地が悪い、ということがある。EEGはこうした体験を直接「読み取る」わけではないが、主観評価と組み合わせることで、設計案の違いに伴う生理的反応を追加の観測情報として扱える。',
     supp3h: '「クライアントが言葉にできない差」を、比較実験にできる',
     supp3p: '例えばクライアントに「AとB、どちらが好きですか？」と聞く。「Aです」と答える。「なぜですか？」と聞くと「なんとなく……」となる。そこで終わるのではなく、A/Bをもう一度体験してもらい、EEG + 主観評価から、設計者が「この人は開口を大きくすると『開放的』という評価は上がるけれど、『落ち着く』という評価は下がる」などと見る。すると、「開放感を最大化する」のではなく、「開放感を確保しながら落ち着きも維持する」という設計課題が見えてくる。',
     supp4h: '莫大な費用のかかる建築空間を、出来上がる前に検証できる',
-    supp4p: '従来：建築は、一度つくってしまうと簡単には変えられない。設計段階では、図面・CG・模型などから空間を想像して判断する。<br>Our Approach：VRやパースなどのデジタル空間を使い、実際に建築をつくる前に、人がその空間をどう感じるかを検証する。',
+    supp4p: '従来：建築は、一度つくってしまうと簡単には変えられない。設計段階では、図面・CG・模型などから空間を想像して判断する。<br>EEGを使う場合：VRやパースなどのデジタル空間を使い、実際に建築をつくる前に、人がその空間をどう感じるかを検証する。',
     supp5h: '「この建築家ならこうする」から「この人に対してこうする」へ',
-    supp5p: 'パーソナライズができる。例えば同じ住宅でも、Person A：大きな窓 → 開放感↑/Comfort↑、Person B：大きな窓 → 開放感↑/Comfort↓ だったら、「大きな窓が良い住宅」という一般論ではなく、<b>このクライアントにとって何が心地よいか</b>を探索できる。',
+    supp5p: 'パーソナライズができる。例えば同じ住宅でも、<br>Person A：大きな窓 → 開放感↑/Comfort↑<br>Person B：大きな窓 → 開放感↑/Comfort↓<br>だったら、「大きな窓が良い住宅」という一般論ではなく、<b>このクライアントにとって何が心地よいか</b>を探索できる。',
     suppNote: '<b>＊EEGが設計するのではなく、EEGによって設計者の問いが変わる。</b>',
 
     btnConnect: 'デバイスを接続する',
@@ -739,8 +738,7 @@ const I18N = {
     introMeasure: 'Muse 2 で言えるのは、前頭部の「脳の活発さ」です',
     introHigh: '【活発】 → 活発にしたい場面(学ぶ・遊ぶ、働く・集中、にぎわう・回遊、動く・競う)に分類',
     introLow: '【静か】 → 静かにしたい場面(待つ・休む、眠る、読む・落ち着く)に分類',
-    introLimit: 'Muse 2 で言えるのは、活発か静かかまでです。くつろぎか退屈か、楽しさか緊張かは、多点EEGなら区別できる可能性があります',
-    introPurpose: '空間の目的を選ぶと、対応した脳波の読み取り方と建築のブラッシュアップの方向性を表示',
+    introLimit: 'くつろぎか退屈か、楽しさか緊張かは、多点EEGなら区別できる可能性があります',
     purposeGreyTitle: 'Muse 2 では測定できない目的(多点EEGが必要)',
     purposeNeedLab: '必要な測定',
     purposePickError: '空間の目的を選んでください。',
@@ -800,15 +798,15 @@ const I18N = {
     ctaMeasure: 'Start EEG measurement →',
     suppTitle: 'What changes when architects use EEG',
     supp1h: 'Turning "it just feels good" into a testable design hypothesis',
-    supp1p: 'Conventionally: an architect decides "a bigger window will probably feel more open" from experience and intuition. With EEG: it becomes a testable question — "does a bigger window actually change this person\'s sense of openness or comfort?"',
+    supp1p: 'Conventionally: an architect decides "a bigger window will probably feel more open" from experience and intuition.<br>With EEG: it becomes a testable question — "does a bigger window actually change this person\'s sense of openness or comfort?"',
     supp2h: 'More judgment criteria beyond "it looks good"',
     supp2p: 'In architecture, evaluation tends to center on visual and verbal qualities — beautiful, cool, well-balanced, open, minimal, good materiality. But when people actually experience a space, there is also: calm, tense, information-overloaded, eye-catching, wanting to stay, liking it for no clear reason, or feeling uneasy without knowing why. EEG doesn\'t directly "read" this experience, but combined with subjective ratings, it adds the physiological response to a design difference as extra observational data.',
     supp3h: 'Turning "a difference the client can\'t put into words" into a comparative experiment',
     supp3p: 'For example, you ask a client "which do you prefer, A or B?" They say "A." You ask "why?" and they say "I don\'t really know…" Rather than stopping there, have them experience A/B again, and from EEG + subjective ratings the designer sees things like "for this person, a bigger opening raises their \'openness\' rating but lowers their \'calm\' rating." That reframes the design problem from "maximize openness" to "preserve calm while securing openness."',
     supp4h: 'Verifying costly architectural spaces before they are built',
-    supp4p: 'Conventionally: once a building is built, it can\'t easily be changed. At the design stage, people imagine the space from drawings, renders and models and judge from that.<br>Our Approach: using digital spaces such as VR and perspective renders, we verify how people will actually feel in a space before it is built.',
+    supp4p: 'Conventionally: once a building is built, it can\'t easily be changed. At the design stage, people imagine the space from drawings, renders and models and judge from that.<br>With EEG: using digital spaces such as VR and perspective renders, we verify how people will actually feel in a space before it is built.',
     supp5h: 'From "what this architect would do" to "what this person needs"',
-    supp5p: 'This enables personalization. For the same house, if Person A: bigger window → openness↑ / comfort↑, while Person B: bigger window → openness↑ / comfort↓ — instead of a general rule that "a bigger window makes a better house," you can explore <b>what actually feels good to this particular client</b>.',
+    supp5p: 'This enables personalization. For the same house, if<br>Person A: bigger window → openness↑ / comfort↑<br>Person B: bigger window → openness↑ / comfort↓<br>then, instead of a general rule that "a bigger window makes a better house," you can explore <b>what actually feels good to this particular client</b>.',
     suppNote: '<b>* EEG doesn\'t design the space — it changes the questions the designer asks.</b>',
 
     btnConnect: 'Connect device',
@@ -922,8 +920,7 @@ const I18N = {
     introMeasure: 'Muse 2 can state: frontal "brain activity"',
     introHigh: '【Active】 → spaces meant to be lively (learning / playing, working, bustling, moving)',
     introLow: '【Quiet】 → spaces meant to be quiet (waiting / resting, sleeping, reading)',
-    introLimit: 'Muse 2 can only say active or quiet. Multi-channel EEG may be able to tell ease from boredom, or enjoyment from tension',
-    introPurpose: 'Choose the purpose of the space to see the matching way of reading the EEG and the direction for architectural refinement',
+    introLimit: 'Multi-channel EEG may be able to tell ease from boredom, or enjoyment from tension',
     purposeGreyTitle: 'Purposes Muse 2 cannot measure (multi-channel EEG needed)',
     purposeNeedLab: 'Needed',
     purposePickError: 'Please choose the purpose of the space.',
@@ -1530,14 +1527,14 @@ function artInit(){
   const a = document.getElementById('artImgA');
   if (!a.dataset.ready){
     a.dataset.ready = 1;
-    for (let i = 0; i < ART_N; i++) { const im = new Image(); im.src = `img/art/${String(i).padStart(2,'0')}.jpg`; }
+    for (let i = 0; i < ART_N; i++) { const im = new Image(); im.src = `${String(i).padStart(2,'0')}.jpg`; }
     artApply(0);
   }
 }
 function artApply(v){
   v = Math.max(0, Math.min(100, v));
   const x = v / 100 * (ART_N - 1), i = Math.min(ART_N - 2, Math.floor(x)), f = x - i;
-  const src = n => `img/art/${String(n).padStart(2,'0')}.jpg`;
+  const src = n => `${String(n).padStart(2,'0')}.jpg`;
   const A = document.getElementById('artImgA'), B = document.getElementById('artImgB');
   if (A.dataset.n != i) { A.src = src(i); A.dataset.n = i; }
   if (B.dataset.n != i + 1) { B.src = src(i + 1); B.dataset.n = i + 1; }
