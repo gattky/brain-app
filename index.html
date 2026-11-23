@@ -30,7 +30,7 @@
     background-attachment: fixed;
     overflow-x:hidden;
   }
-  .art-stage{ position:relative; aspect-ratio:376/245; width:100%; max-width:100%; border:1px solid var(--line, #d8d2c8); border-radius:6px; overflow:hidden; background:#cfcac0; margin:0 auto 16px; max-width:480px; }
+  .art-stage{ position:relative; aspect-ratio:376/245; width:100%; max-width:100%; border:1px solid var(--line, #d8d2c8); border-radius:6px; overflow:hidden; background:#cfcac0; margin:16px auto; max-width:480px; }
   .art-stage img{ position:absolute; inset:0; width:100%; height:100%; object-fit:fill; display:block; }
   .screen{ display:none; min-height:100vh; padding:48px 6vw; }
   .screen.active{ display:block; }
@@ -237,7 +237,7 @@
   .signal-check{ display:none; margin:18px 0 6px; }
   .signal-check .sc-hint{ font-size:13px; line-height:1.8; color:var(--ink-soft); margin-top:10px; }
   .signal-check .sc-hint.bad{ color:#a83232; }
-  .signal-check canvas{ width:100%; max-width:760px; height:auto; margin-top:12px; border-radius:10px; background:rgba(255,255,255,0.7); display:block; }
+  .signal-check canvas{ width:100%; max-width:760px; height:auto; margin:12px auto 0; border-radius:10px; background:rgba(255,255,255,0.7); display:block; }
   .wave-modes{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:12px; }
   .subj-ask{ display:none; margin:18px 0 6px; }
   .subj-ask .subj-note{ font-size:12.5px; line-height:1.8; color:var(--ink-soft); margin-bottom:12px; }
@@ -490,7 +490,7 @@
         <div class="sub" id="measureSub" data-i18n="measureConnecting">Museと接続しています</div>
         <div class="signal-check" id="signalCheck"><div id="signalTable"></div><div class="sc-hint" id="signalHint"></div><div class="art-stage" id="artStage"><img id="artImgA" alt=""><img id="artImgB" alt=""></div><div class="sc-hint" id="signalBattery"></div>
           <button type="button" class="purpose-chip" id="waveToggle" style="font-size:12.5px; padding:6px 14px; margin:10px 0;" onclick="toggleWave()"></button>
-          <div id="waveWrap" style="display:none;"><canvas id="signalWave" width="760" height="380"></canvas>
+          <div id="waveWrap"><canvas id="signalWave" width="760" height="380"></canvas>
           <div class="sc-hint" id="waveScale"></div></div></div>
         <div class="subj-ask" id="subjAsk"><div class="subj-note" id="subjAskNote"></div><div class="subj-btns" id="subjAskBtns"></div></div>
         <div style="margin:22px 0 6px;"><button class="neon-btn" id="measureStartBtn" style="display:none;" onclick="confirmStart()" data-i18n="btnMeasureStart">測定開始</button></div>
@@ -655,6 +655,7 @@ const I18N = {
     batteryNow: (n) => `Museの電池: ${n}%`,
     batteryLow: (n) => `Museの電池が少なくなっています(${n}%)。電池が少ないと、信号が乱れることがあります。充電(3時間以上)してから測ってください。`,
     checkWaiting: '波形を受け取っています…',
+    checkEars: '額（AF7・AF8）は良好です。耳の後ろ（TP9・TP10）は肌に触れていません。アームの先端を、髪をよけて耳の後ろの肌に当て直してください。このアプリの判定は額を使うので、このまま進めても測れます。',
     checkHuge: '信号が大きすぎます(測れる幅いっぱいです)。電極が肌に触れていない可能性があります。装着し直して、額と耳の後ろの電極を肌にしっかり当ててください。',
     waveShow: '波形を見る', waveHide: '波形を隠す',
     waveScale: '直近4秒。中央が0、薄い線が±100µV(波形は±170µVで切れます)',
@@ -836,6 +837,7 @@ const I18N = {
     batteryNow: (n) => `Muse battery: ${n}%`,
     batteryLow: (n) => `The Muse battery is low (${n}%). A low battery can make the signal erratic. Charge it (3 hours or more) before measuring.`,
     checkWaiting: 'Receiving the signal…',
+    checkEars: 'Forehead (AF7/AF8) is good. Behind the ears (TP9/TP10) is not touching the skin. Move the arm tips aside from the hair and press them against the skin behind the ears. This app decides from the forehead, so you can continue as is.',
     checkHuge: 'The signal is far too large (at the limit of the measurable range). The electrodes may not be touching the skin. Refit the device and press the electrodes on the forehead and behind the ears firmly against the skin.',
     waveShow: 'Show waveform', waveHide: 'Hide waveform',
     waveScale: 'Last 4 seconds. Center is 0, faint lines are ±100 µV (clipped at ±170 µV)',
@@ -2774,10 +2776,11 @@ async function signalCheck(){
       return;
     }
     if (false) { const lp = muse.lastPkt || {}; hint.style.whiteSpace = 'pre-wrap'; hint.style.fontSize = '11px'; hint.textContent = 'pkt AF7: ' + (lp.af7 || '-') + '\npkt AF8: ' + (lp.af8 || '-') + '\nraw AF7: ' + (muse.live.af7.slice(-6).map(v => v.toFixed(0)).join(', ')); return; }
-    hint.textContent = stalled ? t('checkNoSignal') : !q.af7 || !q.af8 ? t('checkWaiting') : huge ? t('checkHuge') : frontalOk ? '' : t('checkHint');
+    const earsBad = ['tp9', 'tp10'].some(ch => !q[ch] || q[ch].status !== 'good');
+    hint.textContent = stalled ? t('checkNoSignal') : !q.af7 || !q.af8 ? t('checkWaiting') : (frontalOk && earsBad) ? t('checkEars') : huge ? t('checkHuge') : frontalOk ? '' : t('checkHint');
   };
   renderWaveModes();
-  document.getElementById('waveWrap').style.display = 'none'; renderWaveModes();
+  document.getElementById('waveWrap').style.display = 'block'; renderWaveModes();
   artStartLive();
   const iv = setInterval(update, 500);
   const ivw = setInterval(drawLiveWave, 200);
