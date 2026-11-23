@@ -1,0 +1,2976 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Architecture+brain</title>
+<style>
+  :root{
+    --ink:#2a2530;
+    --ink-soft:#4a4450;
+    --cyan:#33e6e6;
+    --magenta:#e63de6;
+    --panel:#e9e9e9;
+    --panel-border:#3a3a3a;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    font-family:"Hiragino Mincho ProN","Yu Mincho",serif;
+    color:var(--ink);
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 85% 15%, #f4a6e6 0%, rgba(244,166,230,0) 45%),
+      radial-gradient(circle at 100% 45%, #7fd8f0 0%, rgba(127,216,240,0) 40%),
+      radial-gradient(circle at 10% 80%, #cfa6f4 0%, rgba(207,166,244,0) 45%),
+      radial-gradient(circle at 30% 15%, #bfe0f7 0%, rgba(191,224,247,0) 40%),
+      #fdfcfe;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    overflow-x:hidden;
+  }
+  .art-stage{ position:relative; aspect-ratio:376/245; width:100%; max-width:100%; border:1px solid var(--line, #d8d2c8); border-radius:6px; overflow:hidden; background:#cfcac0; margin:16px auto; max-width:480px; }
+  .art-stage img{ position:absolute; inset:0; width:100%; height:100%; object-fit:fill; display:block; }
+  .screen{ display:none; min-height:100vh; padding:48px 6vw; }
+  .screen.active{ display:block; }
+
+  /* ---------- Home ---------- */
+  #screen-home .brand{
+    text-align:center;
+    font-size:28px;
+    letter-spacing:0.5em;
+    margin: 8px 0 64px;
+    padding-left: 0.5em;
+  }
+  .home-grid{ display:flex; gap:6vw; align-items:center; flex-wrap:wrap; }
+  .home-copy{ flex:1 1 320px; min-width:280px; }
+  .eyebrow{ font-size:14px; letter-spacing:0.35em; color:var(--ink-soft); line-height:2.1; margin-bottom:18px; }
+  .rule{ width:220px; height:1px; background:var(--ink-soft); margin-bottom:28px; position:relative; }
+  .rule::before{ content:""; position:absolute; left:0; top:-6px; width:20px; height:1px; background:var(--ink-soft); transform:rotate(35deg); transform-origin:left; }
+  .headline{ font-size:clamp(28px,4vw,42px); letter-spacing:0.15em; line-height:1.9; }
+  .headline .strike{ text-decoration: line-through; text-decoration-thickness:1px; }
+  .headline .row1{ white-space:nowrap; }
+  .headline .row2{ white-space:nowrap; }
+  .headline .spacer{ visibility:hidden; }
+  .phone{ flex:0 0 260px; width:260px; height:340px; border-radius:20px; overflow:hidden; box-shadow:0 18px 40px -12px rgba(20,20,50,0.45); }
+  .phone .placeholder{ width:100%; height:100%; }
+  .phone .placeholder svg{ width:100%; height:100%; display:block; }
+  .photo-hero{ position:relative; }
+  .photo-hero img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .photo-hero .wave-overlay{ position:absolute; inset:0; width:100%; height:100%; }
+  .cta-wrap{ flex:1 1 260px; display:flex; justify-content:center; }
+
+  .home-supplement{ max-width:820px; margin:96px auto 0; }
+  .home-supplement > h2.section-title{ text-align:center; margin-bottom:44px; }
+  .home-supplement > h2.supp-title{ font-size:16px; letter-spacing:0.08em; font-weight:400; }
+  .supp-item{ display:flex; gap:22px; padding:26px 0; border-top:1px solid rgba(74,68,80,0.18); }
+  .supp-item:last-of-type{ border-bottom:1px solid rgba(74,68,80,0.18); }
+  .supp-num{ flex:0 0 44px; font-size:22px; letter-spacing:0.05em; color:var(--ink-soft); opacity:0.5; }
+  .supp-body h4{ font-size:16px; letter-spacing:0.08em; margin:0 0 10px; font-weight:400; }
+  .supp-body p{ font-size:13.5px; line-height:2; color:var(--ink-soft); margin:0; }
+  .supp-body p b{ color:var(--ink); font-weight:600; }
+  .supp-note{ margin-top:36px; padding:26px 28px; border-radius:10px; background:rgba(255,255,255,0.55); }
+  .supp-note p{ font-size:13.5px; line-height:2; color:var(--ink-soft); margin:0 0 12px; }
+  .supp-note p:last-child{ margin-bottom:0; }
+  .supp-note p b{ color:var(--ink); font-weight:600; }
+  .supp-flow{ font-size:12.5px !important; letter-spacing:0.02em; color:var(--ink-soft); opacity:0.85; }
+
+  /* ---------- Neon button ---------- */
+  .neon-btn{
+    display:inline-block; position:relative; padding:20px 34px;
+    background:var(--panel); border:2px solid var(--panel-border); border-radius:8px;
+    font-family:inherit; font-size:16px; letter-spacing:0.05em; color:var(--ink);
+    cursor:pointer;
+    box-shadow:-6px 6px 0 var(--cyan), 6px 6px 0 var(--magenta);
+    transition:transform .12s ease;
+  }
+  .neon-btn:hover{ transform:translate(1px,-1px); }
+  .neon-btn:active{ transform:translate(2px,1px); }
+  .neon-btn:disabled{ opacity:0.45; cursor:not-allowed; }
+
+  #screen-menu.active{ display:flex; align-items:flex-start; justify-content:center; gap:6vw; padding-top:18vh; flex-wrap:wrap; }
+  .menu-intro{ max-width:640px; margin:40px auto 0; padding:18px 22px; border-radius:14px; background:rgba(255,255,255,0.72); border:1px solid #e1dbe9; font-size:14px; line-height:1.9; }
+  .menu-intro h2{ text-align:center; font-size:14px; letter-spacing:0.12em; color:var(--ink-soft); margin:0 0 8px; font-weight:500; }
+  .menu-intro ul{ margin:0; padding:0; list-style:none; text-align:center; }
+  .menu-intro li.mi-gap{ margin-top:1.8em; }
+  .menu-intro p{ margin:0; }
+  .menu-intro li:first-child{ font-weight:700; }
+  .menu-intro li.mi-small{ font-size:12px; color:var(--ink-soft); line-height:1.7; }
+
+  .subscreen{ max-width:960px; margin:0 auto; }
+  .back-link{ background:none; border:none; cursor:pointer; font-family:inherit; font-size:14px; color:var(--ink-soft); letter-spacing:0.1em; margin-bottom:32px; padding:0; }
+  h2.section-title{ font-size:22px; letter-spacing:0.2em; margin-bottom:36px; font-weight:400; }
+  h3.section-title{ font-size:16px; letter-spacing:0.15em; margin:36px 0 14px; font-weight:400; }
+
+  .upload-row{ display:flex; gap:32px; flex-wrap:wrap; margin-bottom:36px; }
+  .upload-card{ flex:1 1 260px; }
+  .upload-card label.field-label{ display:block; font-size:13px; letter-spacing:0.15em; color:var(--ink-soft); margin-bottom:10px; }
+  .drop{ border:1.5px dashed #b9b3c4; border-radius:10px; height:200px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; background:rgba(255,255,255,0.5); }
+  .drop img{ width:100%; height:100%; object-fit:cover; }
+  .drop .drop-label{ font-size:13px; color:#9a94a6; letter-spacing:0.1em; text-align:center; padding:0 10px; }
+  .drop input[type=file]{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+  input.text-input{ width:100%; margin-top:12px; padding:10px 12px; border:1px solid #cfc9d6; border-radius:6px; font-family:inherit; font-size:14px; background:rgba(255,255,255,0.7); }
+
+  .measure-stage{ text-align:center; padding:60px 0; }
+  .measure-stage .label{ font-size:20px; letter-spacing:0.2em; margin-bottom:24px; }
+  .measure-stage .timer{ font-size:56px; letter-spacing:0.05em; margin-bottom:20px; }
+  .measure-stage .sub{ font-size:14px; color:var(--ink-soft); letter-spacing:0.1em; }
+  .measure-preview{ width:220px; height:150px; margin:0 auto 28px; border-radius:8px; overflow:hidden; background:#eee; }
+  .measure-preview img{ width:100%; height:100%; object-fit:cover; }
+
+  .result-card{ display:flex; gap:24px; padding:20px; border:1px solid #e2ddea; border-radius:10px; margin-bottom:20px; background:rgba(255,255,255,0.55); flex-wrap:wrap; cursor:pointer; }
+  .result-thumbs{ display:flex; gap:8px; }
+  .result-thumbs img{ width:80px; height:60px; object-fit:cover; border-radius:4px; background:#ddd; }
+  .result-meta{ flex:1; min-width:180px; }
+  .result-meta .ts{ font-size:12px; color:var(--ink-soft); }
+  .result-meta .labels{ font-size:15px; margin-top:6px; }
+
+  .detail-images{ display:flex; gap:20px; margin-bottom:12px; flex-wrap:wrap; }
+  .detail-images figure{ margin:0; flex:1 1 260px; }
+  .detail-images img{ width:100%; height:200px; object-fit:cover; border-radius:8px; background:#ddd; }
+  .detail-images figcaption{ font-size:13px; margin-top:8px; letter-spacing:0.1em; color:var(--ink-soft); }
+
+  .chart-pair{ display:flex; gap:16px; flex-wrap:wrap; margin-bottom:8px; }
+  .chart-box{ flex:1 1 320px; background:rgba(255,255,255,0.55); border-radius:10px; padding:12px; }
+  .chart-box .chart-label{ font-size:12px; color:var(--ink-soft); margin-bottom:6px; letter-spacing:0.05em; }
+  canvas{ width:100% !important; max-width:100%; }
+  #chartBandBox{ background:rgba(255,255,255,0.5); border-radius:10px; padding:12px; }
+  .band-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:16px; margin-bottom:8px; }
+  .band-grid .chart-box{ min-width:0; }
+
+  .empty-note{ color:var(--ink-soft); font-size:14px; letter-spacing:0.05em; }
+  .error-note{ color:#a83232; font-size:14px; margin-top:16px; }
+
+  /* ---------- Interpretation guide ---------- */
+  .guide{ margin-top:52px; }
+  .guide > h3.section-title{ margin-bottom:20px; }
+  .guide details{ border:1px solid #e2ddea; border-radius:8px; padding:12px 18px; margin-bottom:10px; background:rgba(255,255,255,0.5); }
+  .guide details[open]{ background:rgba(255,255,255,0.7); }
+  .guide summary{ cursor:pointer; font-size:14.5px; letter-spacing:0.05em; }
+  .guide summary .band-freq{ color:var(--ink-soft); font-size:12.5px; margin-left:8px; }
+  .guide .band-body{ margin-top:14px; font-size:13px; line-height:1.9; color:var(--ink-soft); }
+  .guide .band-body h4{ font-size:13px; color:var(--ink); margin:14px 0 6px; letter-spacing:0.05em; }
+  .guide .band-body ul{ margin:4px 0 10px; padding-left:1.3em; }
+  .guide table{ width:100%; border-collapse:collapse; font-size:12.5px; margin-top:10px; }
+  .guide th, .guide td{ border:1px solid #e2ddea; padding:7px 9px; text-align:left; vertical-align:top; color:var(--ink-soft); }
+  .guide th{ color:var(--ink); background:rgba(255,255,255,0.4); }
+  .guide .rules-list{ font-size:13px; line-height:2; color:var(--ink-soft); padding-left:1.3em; }
+  .guide .case-block{ font-size:12.5px; color:var(--ink-soft); line-height:1.9; margin-bottom:10px; }
+  .guide .case-block b{ color:var(--ink); }
+  .info-note{ color:var(--ink-soft); font-size:13px; margin-top:16px; line-height:1.7; }
+  .quality-block{ margin-bottom:8px; }
+  .quality-table{ border-collapse:separate; border-spacing:6px; font-size:12px; }
+  .quality-table th{ font-weight:600; color:var(--ink-soft); padding:4px 8px; text-align:center; }
+  .quality-table th.q-room{ text-align:left; }
+  .quality-table td{ text-align:center; padding:6px 14px; border-radius:8px; background:rgba(255,255,255,0.55); }
+  .quality-table .q-pct{ display:block; font-size:15px; font-weight:600; }
+  .quality-table .q-st{ display:block; font-size:11px; letter-spacing:0.05em; }
+  .quality-table td.q-good{ background:rgba(60,170,110,0.18); color:#1f6b42; }
+  .quality-table td.q-fair{ background:rgba(240,170,40,0.22); color:#8a5a00; }
+  .quality-table td.q-poor{ background:rgba(200,60,60,0.18); color:#a83232; }
+
+
+  /* ---------- Register / measuring (v3) ---------- */
+  textarea.text-input{ resize:vertical; line-height:1.6; width:100%; box-sizing:border-box; margin-top:10px; font-family:inherit; }
+  .settings-row{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .settings-row .field-label{ font-size:13px; letter-spacing:0.1em; color:var(--ink-soft); }
+  .num-input{ width:84px; padding:9px 10px; border:1px solid #cfc9d6; border-radius:6px; font-family:inherit; font-size:15px; background:rgba(255,255,255,0.7); margin-right:18px; }
+  .measure-desc{ max-width:560px; margin:-8px auto 22px; line-height:1.8; font-size:13px; white-space:pre-wrap; }
+  .space-card{ margin:0; flex:1 1 260px; padding:16px 18px; border-radius:10px; background:rgba(255,255,255,0.55); }
+  .space-card img{ width:100%; height:200px; object-fit:cover; border-radius:8px; background:#ddd; margin-bottom:10px; }
+  .space-card .space-name{ font-size:14px; letter-spacing:0.1em; color:var(--ink); }
+  .space-card .space-desc{ font-size:12.5px; color:var(--ink-soft); line-height:1.8; margin-top:6px; white-space:pre-wrap; }
+  .result-card .result-desc{ font-size:12px; color:var(--ink-soft); margin-top:6px; line-height:1.6; }
+
+  /* ---------- Raw EEG lanes (SVG) ---------- */
+  .raw-svg{ width:100%; height:auto; display:block; }
+  .raw-svg text{ font-size:10px; fill:var(--ink-soft); font-family:inherit; }
+  .raw-legend{ display:flex; align-items:center; gap:8px; }
+  .swatch-rej{ flex:none; display:inline-block; width:22px; height:12px; border-radius:3px; background:rgba(214,60,60,0.28); border:1px solid rgba(214,60,60,0.5); }
+
+  /* ---------- Brain map ---------- */
+  .brain-block{ margin-bottom:8px; }
+  .brain-wrap{ display:flex; gap:28px; flex-wrap:wrap; align-items:flex-start; margin-top:14px; }
+  .brain-left{ flex:1 1 320px; max-width:420px; }
+  .brain-roles{ flex:1 1 300px; }
+  .brain-tabs{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+  .brain-tab{ font-family:inherit; font-size:12px; letter-spacing:0.05em; padding:6px 12px; border:1px solid #cfc9d6; border-radius:16px; background:rgba(255,255,255,0.6); color:var(--ink-soft); cursor:pointer; }
+  .brain-tab.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .brain-svg{ width:100%; height:auto; display:block; }
+  .brain-svg text{ font-family:inherit; fill:var(--ink); }
+  .brain-legend{ display:flex; align-items:center; gap:8px; font-size:11px; color:var(--ink-soft); margin-top:6px; }
+  .brain-legend .grad{ flex:1; height:8px; border-radius:4px; background:linear-gradient(90deg, rgba(32,201,214,0.9), rgba(200,200,210,0.25), rgba(214,38,201,0.9)); }
+  .brain-summary{ margin-top:12px; padding:12px 14px; border-radius:10px; background:rgba(255,255,255,0.6); font-size:13.5px; line-height:1.8; }
+  .brain-summary .sub-note{ display:block; margin-top:4px; font-size:12px; color:var(--ink-soft); }
+  .role-item{ display:flex; gap:12px; padding:10px 12px; border-radius:10px; background:rgba(255,255,255,0.5); margin-bottom:8px; }
+  .role-item .dot{ flex:none; width:14px; height:14px; border-radius:50%; margin-top:4px; border:1px solid rgba(0,0,0,0.12); }
+  .role-item .dot.unmeasured{ background-image:repeating-linear-gradient(45deg, rgba(255,255,255,0.7) 0 2px, transparent 2px 5px); }
+  .role-item .rname{ font-size:13.5px; letter-spacing:0.05em; }
+  .role-item .rname .badge{ font-size:10.5px; margin-left:8px; padding:2px 8px; border-radius:10px; background:rgba(60,170,110,0.18); color:#1f6b42; letter-spacing:0.03em; }
+  .role-item .rname .badge.off{ background:rgba(120,120,130,0.15); color:#666; }
+  .role-item .rrole{ font-size:12.5px; color:var(--ink-soft); line-height:1.7; margin-top:3px; }
+  .role-item .rsite{ font-size:11.5px; color:#7a7486; margin-top:3px; }
+
+
+  /* ---------- Conclusion card / data section ---------- */
+  .concl-card{ background:rgba(255,255,255,0.72); border:1px solid #cfc9d6; border-radius:14px; padding:22px 24px; margin:6px 0 40px; }
+  .concl-kicker{ font-size:12px; letter-spacing:0.25em; color:var(--ink-soft); margin-bottom:8px; }
+  .concl-head{ font-size:19px; line-height:1.7; margin-bottom:12px; white-space:pre-line; }
+  .concl-sub{ font-size:14.5px; line-height:1.9; color:var(--ink); white-space:pre-line; }
+  .concl-body{ white-space:pre-line; font-size:12px; line-height:1.7; }
+  .concl-pink{ margin-top:22px; border-top:1px solid #cfc9d6; padding:6px 18px 16px; border-radius:0 0 10px 10px; background:rgba(214,38,201,0.07); }
+  .concl-arch{ margin-top:14px; padding-top:12px; border-top:1px dashed #d9bfe0; font-size:14px; line-height:1.9; }
+  .concl-arch:empty{ display:none; }
+  .concl-arch .al{ font-size:12px; letter-spacing:0.1em; color:var(--ink-soft); display:block; margin-bottom:2px; }
+  .concl-arch p{ margin:0 0 8px; }
+  .concl-arch ul{ margin:4px 0 0; padding-left:1.3em; }
+  .arch-step{ display:flex; gap:12px; align-items:baseline; margin-bottom:6px; }
+  .arch-step b{ flex:none; font-weight:500; font-size:12.5px; letter-spacing:0.06em; color:var(--ink-soft); min-width:3.8em; white-space:nowrap; }
+  .arch-step span{ min-width:0; }
+  .arch-photo{ font-size:12.5px; color:var(--ink-soft); margin:6px 0 0; }
+  .concl-arch li{ margin-bottom:6px; }
+  .body-note{ padding-left:1.3em; margin:8px 0; }
+  .concl-intro{ font-size:13.5px; line-height:1.8; color:var(--ink-soft); margin:0 0 10px; }
+  .concl-intro:empty{ display:none; }
+  .view-note{ font-size:13px; line-height:1.8; color:var(--ink-soft); margin:-8px 0 20px; }
+  .signal-check{ display:none; margin:18px 0 6px; }
+  .signal-check .sc-hint{ font-size:13px; line-height:1.8; color:var(--ink-soft); margin-top:10px; }
+  .signal-check .sc-hint.bad{ color:#a83232; }
+  .signal-check canvas{ width:100%; max-width:760px; height:auto; margin:12px auto 0; border-radius:10px; background:rgba(255,255,255,0.7); display:block; }
+  .wave-modes{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:12px; }
+  .subj-ask{ display:none; margin:18px 0 6px; }
+  .subj-ask .subj-note{ font-size:12.5px; line-height:1.8; color:var(--ink-soft); margin-bottom:12px; }
+  .subj-ask .subj-btns{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  .concl-q-title{ font-size:13px; letter-spacing:0.1em; color:var(--ink-soft); margin:18px 0 6px; }
+  .concl-q{ margin:0; padding-left:1.3em; font-size:14px; line-height:1.9; }
+  .concl-q li{ margin-bottom:6px; }
+  .concl-subj{ margin-top:20px; padding-top:16px; border-top:1px dashed #cfc9d6; font-size:13px; }
+  .concl-subj .subj-btns{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .subj-btn{ font-family:inherit; font-size:13px; padding:7px 14px; border:1px solid #cfc9d6; border-radius:18px; background:rgba(255,255,255,0.7); color:var(--ink-soft); cursor:pointer; }
+  .subj-btn.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .concl-how{ margin-top:20px; padding:12px 14px; border-radius:10px; background:rgba(240,238,246,0.7); font-size:12.5px; line-height:1.8; color:var(--ink-soft); }
+  .concl-how-title{ font-size:12px; letter-spacing:0.15em; margin-bottom:4px; }
+  .concl-how ul{ margin:0; padding-left:1.2em; }
+  h2.data-title{ font-size:20px; margin:48px 0 28px; padding-top:20px; border-top:2px solid var(--ink); }
+  .chart-pair.data-large{ flex-direction:column; }
+  .chart-pair.data-large .chart-box{ flex:none; width:100%; }
+  .data-table{ border-collapse:collapse; width:100%; font-size:13px; font-variant-numeric:tabular-nums; }
+  .data-table th, .data-table td{ border:1px solid #d8d3df; padding:8px 10px; text-align:center; vertical-align:top; }
+  .data-table th{ background:rgba(240,238,246,0.8); font-weight:400; letter-spacing:0.05em; }
+  .data-table td .va{ color:#168a94; } .data-table td .vb{ color:#a6199c; }
+  .data-table td .vr{ font-size:11.5px; color:var(--ink-soft); }
+  .data-table td.na{ color:#999; }
+
+
+  /* ---------- Purpose picker / conclusion rows ---------- */
+  .purpose-block{ margin-bottom:30px; }
+  .purpose-group-title{ font-size:12.5px; letter-spacing:0.12em; color:var(--ink-soft); margin:14px 0 0; }
+  .purpose-chips{ display:flex; gap:10px; flex-wrap:wrap; margin:10px 0 20px; }
+  .purpose-chip{ font-family:inherit; font-size:15px; letter-spacing:0.05em; padding:10px 20px; border:1px solid #cfc9d6; border-radius:22px; background:rgba(255,255,255,0.75); color:var(--ink); cursor:pointer; }
+  .purpose-chip.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .purpose-grey-title{ font-size:12.5px; letter-spacing:0.12em; color:var(--ink-soft); margin:6px 0 8px; }
+  .purpose-grey{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:8px; }
+  .purpose-grey .pg{ padding:9px 12px; border:1px dashed #cfc9d6; border-radius:10px; background:rgba(235,233,240,0.55); color:#8a8594; font-size:13px; line-height:1.6; }
+  .purpose-grey .pg b{ font-weight:400; display:block; color:#6f6a7a; }
+  .purpose-grey .pg span{ font-size:11.5px; }
+  .concl-row{ display:flex; gap:12px; font-size:13.5px; line-height:1.8; margin-bottom:4px; }
+  .concl-lab{ flex:none; width:6.5em; color:var(--ink-soft); letter-spacing:0.05em; }
+  .concl-val{ min-width:0; }
+  .concl-head{ margin-top:16px; }
+  .concl-main{ border:2px solid #e8862a; background:rgba(255,160,70,0.10); border-radius:14px; padding:14px 18px; margin:16px 0 12px; text-align:center; }
+  .concl-main .concl-head{ margin:0 0 6px; }
+  .concl-main .concl-sub{ margin:0; white-space:pre-line; }
+  .concl-main .concl-sub:empty{ display:none; }
+  .concl-calc{ font-size:12px; color:var(--ink-soft); opacity:0.9; line-height:1.7; margin:0 0 10px; }
+  .concl-calc:empty{ display:none; }
+  .concl-photo-note{ font-size:11.5px; color:var(--ink-soft); opacity:0.85; line-height:1.7; margin:-6px 0 12px; text-align:center; }
+  .concl-photo-note:empty{ display:none; }
+  .concl-extra-note{ font-size:11.5px; color:var(--ink-soft); opacity:0.9; line-height:1.7; margin:-6px 0 10px; }
+  .concl-extra-note:empty{ display:none; }
+  .concl-note{ font-size:12px; color:var(--ink-soft); opacity:0.85; line-height:1.7; margin:0 0 12px; text-align:center; }
+  .concl-extra{ font-size:13.5px; color:var(--ink-soft); line-height:1.8; margin-bottom:10px; }
+  .concl-body{ font-size:13.5px; color:var(--ink-soft); line-height:1.8; margin-bottom:10px; }
+  .concl-body:empty{ display:none; }
+  .concl-next{ margin-top:14px; font-size:13px; line-height:1.8; padding:10px 14px; border-radius:10px; background:rgba(214,38,201,0.06); }
+  .concl-next .nl{ font-size:12px; letter-spacing:0.1em; color:var(--ink-soft); display:block; }
+
+  /* ---------- Language toggle ---------- */
+  .lang-toggle{ position:fixed; top:20px; right:20px; z-index:1000; display:flex; border:1.5px solid var(--panel-border); border-radius:20px; overflow:hidden; background:#fff; }
+  .lang-toggle button{ font-family:inherit; font-size:12px; letter-spacing:0.05em; padding:7px 14px; border:none; background:transparent; color:var(--ink-soft); cursor:pointer; }
+  .lang-toggle button.active{ background:var(--ink); color:#fff; }
+</style>
+</head>
+<body>
+
+  <div class="lang-toggle">
+    <button id="langBtnJa" onclick="setLanguage('ja')">日本語</button>
+    <button id="langBtnEn" onclick="setLanguage('en')">EN</button>
+  </div>
+
+  <!-- ===================== HOME ===================== -->
+  <section id="screen-home" class="screen active">
+    <div class="brand">Architecture + brain</div>
+    <div class="home-grid">
+      <div class="home-copy">
+        <div class="eyebrow" data-i18n-html="eyebrow">建築家が開発した<br>脳波測定アプリ</div>
+        <div class="rule"></div>
+        <div class="headline">
+          <div class="row1"><span data-i18n="headlineRow1a">空間を</span><span class="strike" data-i18n="headlineRow1b">思考する</span></div>
+          <div class="row2"><span class="spacer" data-i18n="headlineRow1a">空間を</span><span data-i18n="headlineRow2b">感じる</span></div>
+        </div>
+      </div>
+      <div class="phone">
+        <div class="placeholder photo-hero">
+          <img src="eeg-hero.jpg" alt="EEGキャップを装着した測定の様子">
+          <svg class="wave-overlay" viewBox="0 0 260 340" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#ffd98a"/>
+                <stop offset="50%" stop-color="#ffffff"/>
+                <stop offset="100%" stop-color="#8fd6ff"/>
+              </linearGradient>
+              <filter id="waveGlow" x="-60%" y="-60%" width="220%" height="220%">
+                <feGaussianBlur stdDeviation="1.6" result="blur"/>
+                <feMerge>
+                  <feMergeNode in="blur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+            <!-- brainwave trace drawn over the photo -->
+            <path d="M 0 58 L 26 58 L 34 34 L 44 84 L 54 58 L 74 58 L 84 20 L 96 100 L 108 58 L 130 58 L 140 40 L 150 76 L 160 58 L 260 58"
+                  fill="none" stroke="url(#waveGrad)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+                  opacity="0.92" filter="url(#waveGlow)"/>
+            <path d="M 40 96 L 58 96 L 66 78 L 76 116 L 86 96 L 104 96 L 112 70 L 122 128 L 132 96 L 150 96"
+                  fill="none" stroke="url(#waveGrad)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"
+                  opacity="0.4"/>
+          </svg>
+        </div>
+      </div>
+      <div class="cta-wrap">
+        <div>
+          <button class="neon-btn" id="homeBtn" onclick="goToMenu()" data-i18n="ctaMeasure">脳波を測定する →</button>
+          <div class="error-note" id="homeError"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-intro">
+      <h2 data-i18n="introTitle">このアプリで分かること</h2>
+      <ul>
+        <li data-i18n="introMeasure"></li>
+        <li data-i18n="introHigh"></li>
+        <li data-i18n="introLow"></li>
+        <li class="mi-small" data-i18n="introLimit"></li>
+      </ul>
+    </div>
+
+    <div class="home-supplement">
+      <h2 class="section-title supp-title" data-i18n="suppTitle">EEGを設計者が使うと、何が変わるか</h2>
+
+      <div class="supp-item">
+        <div class="supp-num">01</div>
+        <div class="supp-body">
+          <h4 data-i18n="supp1h">「なんとなく良い」を、検証できる設計仮説に変えられる</h4>
+          <p data-i18n-html="supp1p">従来：「このくらい窓を大きくした方が開放的だろう」という建築家の経験・直感から決める。<br>EEGを使う場合：「窓を大きくすると、本当にこの人の開放感や快適性に変化があるのか？」という検証可能な問いになる。</p>
+        </div>
+      </div>
+
+      <div class="supp-item">
+        <div class="supp-num">02</div>
+        <div class="supp-body">
+          <h4 data-i18n="supp2h">「見た目が良い」以外の判断材料が増える</h4>
+          <p data-i18n-html="supp2p">建築では、最終的に美しい・かっこいい・バランスがいい・開放的・ミニマル・素材感がいい、など視覚的・言語的な評価が中心になりやすい。でも実際に人が空間を体験すると、落ち着く・緊張する・情報量が多い・視線が吸い寄せられる・なんとなく居続けたい・なぜか好き・逆に理由は分からないけれど居心地が悪い、ということがある。EEGはこうした体験を直接「読み取る」わけではないが、主観評価と組み合わせることで、設計案の違いに伴う生理的反応を追加の観測情報として扱える。</p>
+        </div>
+      </div>
+
+      <div class="supp-item">
+        <div class="supp-num">03</div>
+        <div class="supp-body">
+          <h4 data-i18n="supp3h">「クライアントが言葉にできない差」を、比較実験にできる</h4>
+          <p data-i18n-html="supp3p">例えばクライアントに「AとB、どちらが好きですか？」と聞く。「Aです」と答える。「なぜですか？」と聞くと「なんとなく……」となる。そこで終わるのではなく、A/Bをもう一度体験してもらい、EEG + 主観評価から、設計者が「この人は開口を大きくすると『開放的』という評価は上がるけれど、『落ち着く』という評価は下がる」などと見る。すると、「開放感を最大化する」のではなく、「開放感を確保しながら落ち着きも維持する」という設計課題が見えてくる。</p>
+        </div>
+      </div>
+
+      <div class="supp-item">
+        <div class="supp-num">04</div>
+        <div class="supp-body">
+          <h4 data-i18n="supp4h">莫大な費用のかかる建築空間を、出来上がる前に検証できる</h4>
+          <p data-i18n-html="supp4p">従来：建築は、一度つくってしまうと簡単には変えられない。設計段階では、図面・CG・模型などから空間を想像して判断する。<br>
+          EEGを使う場合：VRやパースなどのデジタル空間を使い、実際に建築をつくる前に、人がその空間をどう感じるかを検証する。</p>
+        </div>
+      </div>
+
+      <div class="supp-item">
+        <div class="supp-num">05</div>
+        <div class="supp-body">
+          <h4 data-i18n="supp5h">「この建築家ならこうする」から「この人に対してこうする」へ</h4>
+          <p data-i18n-html="supp5p">パーソナライズができる。例えば同じ住宅でも、<br>Person A：大きな窓 → 開放感↑/Comfort↑<br>Person B：大きな窓 → 開放感↑/Comfort↓<br>だったら、「大きな窓が良い住宅」という一般論ではなく、<b>このクライアントにとって何が心地よいか</b>を探索できる。</p>
+        </div>
+      </div>
+
+      <div class="supp-note">
+        <p data-i18n-html="suppNote"><b>＊EEGが設計するのではなく、EEGによって設計者の問いが変わる。</b></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== MENU ===================== -->
+  <section id="screen-menu" class="screen">
+    <div>
+      <button class="neon-btn" id="connectBtn" onclick="connectDevice()" data-i18n="btnConnect">デバイスを接続する</button>
+      <div class="info-note" id="connectStatus"></div>
+    </div>
+    <button class="neon-btn" onclick="goToRegister()" data-i18n="btnRegister">測定を始める</button>
+    <button class="neon-btn" onclick="goToResults()" data-i18n="btnResults">過去の結果を見る</button>
+  </section>
+
+
+  <!-- ===================== REGISTER ===================== -->
+  <section id="screen-register" class="screen">
+    <div class="subscreen">
+      <button class="back-link" onclick="showScreen('menu')" data-i18n="backToMenu">← メニューに戻る</button>
+      <h2 class="section-title" data-i18n="registerTitle">測定の登録</h2>
+      <p class="info-note" style="margin-top:-12px; margin-bottom:28px;" data-i18n="registerIntro"></p>
+
+      <div class="purpose-block">
+        <h3 class="section-title" style="margin-top:0;" data-i18n="purposeTitle">この空間の目的</h3>
+        <div id="purposeChips"></div>
+        <div class="purpose-grey-title" data-i18n="purposeGreyTitle">Muse 2 では測定できない目的</div>
+        <div class="purpose-grey" id="purposeGrey"></div>
+      </div>
+
+      <div class="purpose-block">
+        <h3 class="section-title" style="margin-top:0;" data-i18n="viewTitle">見るもの(必須)</h3>
+        <div class="purpose-chips" id="viewChips" style="margin-bottom:10px;"></div>
+        <p class="view-note" id="viewNote"></p>
+      </div>
+
+      <div class="upload-card" style="margin-bottom:28px;">
+        <label class="field-label" for="sessionTitle" data-i18n="sessionTitleLabel">タイトル(任意)</label>
+        <input class="text-input" id="sessionTitle" maxlength="120" data-i18n-placeholder="sessionTitlePlaceholder" style="margin-top:0;">
+      </div>
+
+      <div class="upload-row">
+        <div class="upload-card">
+          <label class="field-label" for="labelA" data-i18n="spaceALabel">空間 A</label>
+          <input class="text-input" id="labelA" maxlength="80" data-i18n-placeholder="spaceAPlaceholder" value="Room A" style="margin-top:0;">
+          <textarea class="text-input" id="descA" rows="3" maxlength="500" data-i18n-placeholder="descPlaceholder"></textarea>
+        </div>
+        <div class="upload-card">
+          <label class="field-label" for="labelB" data-i18n="spaceBLabel">空間 B</label>
+          <input class="text-input" id="labelB" maxlength="80" data-i18n-placeholder="spaceBPlaceholder" value="Room B" style="margin-top:0;">
+          <textarea class="text-input" id="descB" rows="3" maxlength="500" data-i18n-placeholder="descPlaceholder"></textarea>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <label class="field-label" for="measureSec" data-i18n="secondsLabel">1回の測定時間(秒)</label>
+        <input class="num-input" id="measureSec" type="number" min="10" max="300" value="30">
+        <label class="field-label" for="measureRounds" data-i18n="roundsLabel">繰り返し回数</label>
+        <input class="num-input" id="measureRounds" type="number" min="1" max="6" value="3">
+      </div>
+
+      <div style="margin-top:28px;">
+        <button class="neon-btn" onclick="startFromRegister()" data-i18n="btnStartMeasure">測定を始める</button>
+      </div>
+      <div class="error-note" id="registerError"></div>
+    </div>
+  </section>
+
+  <!-- ===================== MEASURING ===================== -->
+  <section id="screen-measuring" class="screen">
+    <div class="subscreen">
+      <div class="measure-stage">
+        <div class="sub" id="measureProgress" style="margin-bottom:18px;"></div>
+        <div class="label" id="measureLabel" data-i18n="measurePreparing">準備中…</div>
+        <div class="sub measure-desc" id="measureDesc"></div>
+        <div class="timer" id="measureTimer">--</div>
+        <div class="sub" id="measureSub" data-i18n="measureConnecting">Museと接続しています</div>
+        <div class="signal-check" id="signalCheck"><div id="signalTable"></div><div class="sc-hint" id="signalHint"></div><div class="art-stage" id="artStage"><img id="artImgA" alt=""><img id="artImgB" alt=""></div><div class="sc-hint" id="artCaption" data-i18n="artCaption" style="margin-top:0;"></div><div class="sc-hint" id="signalBattery"></div>
+          <button type="button" class="purpose-chip" id="waveToggle" style="font-size:12.5px; padding:6px 14px; margin:10px 0;" onclick="toggleWave()"></button>
+          <div id="waveWrap"><canvas id="signalWave" width="760" height="380"></canvas>
+          <div class="sc-hint" id="waveScale"></div></div></div>
+        <div class="subj-ask" id="subjAsk"><div class="subj-note" id="subjAskNote"></div><div class="subj-btns" id="subjAskBtns"></div></div>
+        <div style="margin:22px 0 6px;"><button class="neon-btn" id="measureStartBtn" style="display:none;" onclick="confirmStart()" data-i18n="btnMeasureStart">測定開始</button></div>
+        <div class="sub" id="measureHint" data-i18n="measureHint" style="margin-top:10px; font-size:12px;"></div>
+        <div class="sub" id="measureSampleCount" style="margin-top:8px;"></div>
+        <div class="error-note" id="measureError"></div>
+        <div style="margin-top:30px;"><button class="back-link" onclick="abortMeasurement()" data-i18n="btnAbort">中止してメニューに戻る</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== RESULTS LIST ===================== -->
+  <section id="screen-results" class="screen">
+    <div class="subscreen">
+      <button class="back-link" onclick="showScreen('menu')" data-i18n="backToMenu">← メニューに戻る</button>
+      <h2 class="section-title" data-i18n="resultsTitle">過去の結果</h2>
+      <div id="resultsList"></div>
+    </div>
+  </section>
+
+  <!-- ===================== RESULT DETAIL ===================== -->
+  <section id="screen-detail" class="screen">
+    <div class="subscreen">
+      <button class="back-link" onclick="showScreen('results')" data-i18n="backToResults">← 一覧に戻る</button>
+      <h2 class="section-title" id="detailTitle" data-i18n="detailTitleDefault">測定結果</h2>
+      <div class="detail-images" id="detailImages"></div>
+      <div class="info-note" id="detailSettings" style="margin-top:0;"></div>
+
+      <div class="error-note" id="chartFallback" style="display:none;"></div>
+
+      <div class="concl-card" id="conclCard">
+        <div class="concl-kicker" data-i18n="conclKicker">結論</div>
+        <div class="concl-row"><span class="concl-lab" data-i18n="conclPurposeLab">今回の目的</span><span class="concl-val" id="conclPurpose"></span></div>
+        <div class="concl-main">
+          <div class="concl-head" id="conclHead"></div>
+          <div class="concl-calc" id="conclCalc"></div>
+          <div class="concl-sub" id="conclMeaning"></div>
+        </div>
+        <div class="concl-note" id="conclNote"></div>
+        <div class="concl-photo-note" id="conclPhotoNote"></div>
+        <div class="concl-extra" id="conclExtra"></div>
+        <div class="concl-extra-note" id="conclExtraNote"></div>
+        <div class="concl-body" id="conclBody"></div>
+        <div class="concl-intro" id="conclIntro"></div>
+        <div class="concl-pink" id="conclPink">
+          <div class="concl-q-title" id="conclQTitle"></div>
+          <ul class="concl-q" id="conclQ"></ul>
+          <div class="concl-arch" id="conclArch"></div>
+        </div>
+        <div class="concl-subj" id="conclSubj"></div>
+      </div>
+
+      <h2 class="section-title data-title" data-i18n="sectionData">データ</h2>
+      <p class="info-note" style="margin-top:-18px;" data-i18n="dataIntro"></p>
+
+      <div class="quality-block" id="qualityBlock" style="display:none;">
+        <h3 class="section-title" data-i18n="sectionQuality">測定品質(ノイズ除去)</h3>
+        <div id="qualityTable" style="overflow-x:auto;"></div>
+        <p class="info-note" data-i18n="qualityNote"></p>
+        <div class="error-note" id="qualityWarn"></div>
+      </div>
+
+      <div class="quality-block" id="bodyBlock" style="display:none;">
+        <h3 class="section-title" data-i18n="sectionBody">からだの反応(心拍・頭の動き)</h3>
+        <div id="bodyTable" style="overflow-x:auto;"></div>
+        <ul class="info-note body-note" data-i18n-html="bodyNote"></ul>
+      </div>
+
+      <h3 class="section-title" data-i18n="sectionRaw">Raw EEG(生波形)</h3>
+      <div class="chart-pair data-large">
+        <div class="chart-box"><div class="chart-label" id="rawLabelA"></div><div id="rawSvgA"></div></div>
+        <div class="chart-box"><div class="chart-label" id="rawLabelB"></div><div id="rawSvgB"></div></div>
+      </div>
+      <p class="info-note raw-legend" id="rawLegend" style="margin-top:6px;"><span class="swatch-rej"></span><span data-i18n="rawLegend"></span></p>
+
+      <h3 class="section-title" data-i18n="sectionPsd">PSD(周波数成分)</h3>
+      <div class="chart-pair data-large">
+        <div class="chart-box"><div class="chart-label" id="psdLabelA"></div><canvas id="chartPsdA" height="180"></canvas></div>
+        <div class="chart-box"><div class="chart-label" id="psdLabelB"></div><canvas id="chartPsdB" height="180"></canvas></div>
+      </div>
+
+      <h3 class="section-title" data-i18n="sectionBand">Band Power(周波数帯 × チャンネル比較)</h3>
+      <div class="band-grid" id="bandGrid">
+        <div class="chart-box"><div class="chart-label">Delta(0.5–4Hz)</div><canvas id="chartBandDelta" height="150"></canvas></div>
+        <div class="chart-box"><div class="chart-label">Theta(4–8Hz)</div><canvas id="chartBandTheta" height="150"></canvas></div>
+        <div class="chart-box"><div class="chart-label">Alpha(8–13Hz)</div><canvas id="chartBandAlpha" height="150"></canvas></div>
+        <div class="chart-box"><div class="chart-label">Beta(13–30Hz)</div><canvas id="chartBandBeta" height="150"></canvas></div>
+        <div class="chart-box"><div class="chart-label">Gamma(30Hz〜)</div><canvas id="chartBandGamma" height="150"></canvas></div>
+      </div>
+
+      <h3 class="section-title" data-i18n="sectionTable">帯域パワーの数値</h3>
+      <div id="dataTable" style="overflow-x:auto;"></div>
+      <p class="info-note" data-i18n="tableNote"></p>
+
+      <h2 class="section-title data-title" data-i18n="sectionBrain">脳マップ(どの部位の付近に差が出たか)</h2>
+      <div class="brain-block" id="brainBlock">
+        <p class="info-note" style="margin-top:0;" data-i18n="brainIntro"></p>
+        <div class="brain-wrap">
+          <div class="brain-left">
+            <div class="brain-tabs" id="brainTabs"></div>
+            <div id="brainSvgWrap"></div>
+            <div class="brain-legend" id="brainLegend"></div>
+            <div class="brain-summary" id="brainSummary"></div>
+          </div>
+          <div class="brain-roles" id="brainRoles"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script>
+/* =========================================================================
+   言語切り替え(日本語 / English)
+   ========================================================================= */
+
+const I18N = {
+  ja: {
+    eyebrow: '建築家が開発した<br>脳波測定アプリ',
+    headlineRow1a: '空間を',
+    headlineRow1b: '思考する',
+    headlineRow2b: '感じる',
+    ctaMeasure: '脳波を測定する →',
+    suppTitle: 'EEGを設計者が使うと、何が変わるか',
+    supp1h: '「なんとなく良い」を、検証できる設計仮説に変えられる',
+    supp1p: '従来：「このくらい窓を大きくした方が開放的だろう」という建築家の経験・直感から決める。<br>EEGを使う場合：「窓を大きくすると、本当にこの人の開放感や快適性に変化があるのか？」という検証可能な問いになる。',
+    supp2h: '「見た目が良い」以外の判断材料が増える',
+    supp2p: '建築では、最終的に美しい・かっこいい・バランスがいい・開放的・ミニマル・素材感がいい、など視覚的・言語的な評価が中心になりやすい。でも実際に人が空間を体験すると、落ち着く・緊張する・情報量が多い・視線が吸い寄せられる・なんとなく居続けたい・なぜか好き・逆に理由は分からないけれど居心地が悪い、ということがある。EEGはこうした体験を直接「読み取る」わけではないが、主観評価と組み合わせることで、設計案の違いに伴う生理的反応を追加の観測情報として扱える。',
+    supp3h: '「クライアントが言葉にできない差」を、比較実験にできる',
+    supp3p: '例えばクライアントに「AとB、どちらが好きですか？」と聞く。「Aです」と答える。「なぜですか？」と聞くと「なんとなく……」となる。そこで終わるのではなく、A/Bをもう一度体験してもらい、EEG + 主観評価から、設計者が「この人は開口を大きくすると『開放的』という評価は上がるけれど、『落ち着く』という評価は下がる」などと見る。すると、「開放感を最大化する」のではなく、「開放感を確保しながら落ち着きも維持する」という設計課題が見えてくる。',
+    supp4h: '莫大な費用のかかる建築空間を、出来上がる前に検証できる',
+    supp4p: '従来：建築は、一度つくってしまうと簡単には変えられない。設計段階では、図面・CG・模型などから空間を想像して判断する。<br>EEGを使う場合：VRやパースなどのデジタル空間を使い、実際に建築をつくる前に、人がその空間をどう感じるかを検証する。',
+    supp5h: '「この建築家ならこうする」から「この人に対してこうする」へ',
+    supp5p: 'パーソナライズができる。例えば同じ住宅でも、<br>Person A：大きな窓 → 開放感↑/Comfort↑<br>Person B：大きな窓 → 開放感↑/Comfort↓<br>だったら、「大きな窓が良い住宅」という一般論ではなく、<b>このクライアントにとって何が心地よいか</b>を探索できる。',
+    suppNote: '<b>＊EEGが設計するのではなく、EEGによって設計者の問いが変わる。</b>',
+
+    btnConnect: 'デバイスを接続する',
+    btnRegister: '測定を始める',
+    btnResults: '過去の結果を見る',
+
+    backToMenu: '← メニューに戻る',
+    registerTitle: '測定の登録',
+    spaceALabel: '空間 A',
+    spaceBLabel: '空間 B',
+    dropLabel: 'クリックまたはドラッグで<br>画像をアップロード',
+    spaceAPlaceholder: '空間Aの名前(例: Room A)',
+    spaceBPlaceholder: '空間Bの名前(例: Room B)',
+    registerStatusDefault: '空間A・空間Bの両方の画像をアップロードすると、自動的に測定が始まります。',
+    registerIntro: '画像のアップロードはありません。実際の空間、または別の端末で開いた写真を見比べながら測定します。',
+    sessionTitleLabel: 'タイトル(任意)',
+    sessionTitlePlaceholder: '例: 会議室の窓の大きさ比較 / 2024-06 ○○オフィス',
+    descPlaceholder: '説明・メモ(任意)例: 北向き窓あり、蛍光灯、午前10時、写真は別端末のスライド3枚目',
+    secondsLabel: '1回の測定時間(秒)',
+    roundsLabel: '繰り返し回数',
+    btnStartMeasure: '測定を始める',
+    btnMeasureStart: '測定開始',
+    checkTitle: '電極の接触を確認', checkSub: '測定の前に、脳波が安定して流れているかを確認します(直近6秒のうち、使えた割合)',
+    checkNext: '確認できたら次へ',
+    checkHint: '額(AF7/AF8)が「良好」になるまで、髪を分けて電極を額にしっかり当て直してください。',
+    checkNoSignal: '脳波が届いていません。Museの電源と、ブラウザとの接続を確認してください。',
+    batteryNow: (n) => `Museの電池: ${n}%`,
+    batteryLow: (n) => `Museの電池が少なくなっています(${n}%)。電池が少ないと、信号が乱れることがあります。充電(3時間以上)してから測ってください。`,
+    checkWaiting: '波形を受け取っています…',
+    artCaption: '脳が活性化すると、サヴォア邸も活性化します。',
+    psdXTitle: '周波数 (Hz)',
+    checkEars: '額（AF7・AF8）は良好です。耳の後ろ（TP9・TP10）は肌に触れていません。アームの先端を、髪をよけて耳の後ろの肌に当て直してください。このアプリの判定は額を使うので、このまま進めても測れます。',
+    checkHuge: '信号が大きすぎます(測れる幅いっぱいです)。電極が肌に触れていない可能性があります。装着し直して、額と耳の後ろの電極を肌にしっかり当ててください。',
+    waveShow: '波形を見る', waveHide: '波形を隠す',
+    waveScale: '直近4秒。中央が0、薄い線が±100µV(波形は±170µVで切れます)',
+    btnAbort: '中止してメニューに戻る',
+    measureReadySub: '空間(または写真)を見る準備ができたら「測定開始」を押してください',
+    measureCountdownSub: 'まもなく測定が始まります',
+    measureProgress: (i, n, sec) => `${i} / ${n} 回目(1回 ${sec} 秒)`,
+    rawLegend: '赤く色付けした区間は、瞬き・体動・接触不良などでノイズが大きいと判断し、解析から除外した部分です(チャンネルごと)。',
+    settingsSummary: (st) => `測定設定: 1回 ${st.seconds} 秒 × ${st.rounds} 回(順序 ${st.order ? st.order.split('').join('→') : '-'})`,
+    sectionBrain: '脳マップ(どの部位の付近に差が出たか)',
+    brainIntro: 'Muse 2 が測れるのは頭の前側(額)と耳の後ろ付近の4点だけです。色は選んだ周波数帯のパワーの違い(空間Aと空間B)を表します。斜線の領域はMuse 2では測れません。',
+    brainAria: '頭を真上から見た脳マップ',
+    brainFront: '前',
+    brainMeasured: 'Muse 2で測れる',
+    brainUnmeasured: 'Muse 2では測れない',
+    brainNoData: '表示できる差がありません(データ不足のチャンネルがあります)。',
+    brainNoDiff: (band) => `${band}では、どの電極付近にも目立った差は見られません(±20%未満が目安)。`,
+    brainTop: (band, region, ch, la, lb, d) => {
+      const ratio = Math.exp(Math.abs(d));
+      const dir = d > 0 ? `${lb} の方が ${la} より` : `${la} の方が ${lb} より`;
+      return `${band}で最も差が大きかったのは ${region}(${ch})の付近です。${dir} 約${ratio.toFixed(2)}倍 高い値でした。`;
+    },
+    brainMissing: '※ データ不足で比較できない電極は色を付けていません。',
+    brainBandCaution: (band) => band === 'Delta'
+      ? '※ Delta(特に額)は瞬き・体動の影響が残りやすい帯域です。除外後も慎重に見てください。'
+      : '※ Gamma は筋肉の動き(顔・顎・首)が混ざりやすい帯域です。補助的に見てください。',
+    brainRegion: {
+      frontal: { short: '前頭部', full: '前頭部', role: '注意・計画・判断・感情の調整(実行機能)。「何に注意を向け、どう関わろうとしているか」の観察位置。', site: '測定位置: AF7(左前頭)/ AF8(右前頭)' },
+      temporal: { short: '側頭部', full: '側頭部', role: '音・言語の処理、記憶、物や顔の認識。空間の音環境や記憶との結びつきを考える観察位置。(記憶の中枢・海馬は深部で、Muse 2では直接測れません)', site: '測定位置: TP9(左)/ TP10(右)' },
+      central: { short: '中心部', full: '中心部(運動・体性感覚)', role: '体を動かす指令と触覚の処理。ミュー波は動きの想像・観察で変化します。', site: '測定位置なし(Muse 2では測れません)' },
+      parietal: { short: '頭頂部', full: '頭頂部', role: '空間の把握・自分の体の位置・注意の向け先。建築の空間認知に関わる重要な領域です。', site: '測定位置なし(Muse 2では測れません)' },
+      occipital: { short: '後頭部', full: '後頭部', role: '視覚の処理(明るさ・形・色・奥行き)。閉眼時にアルファ波が強く出る領域です。', site: '測定位置なし(Muse 2では測れません)' },
+      frontalL: { short: '左前頭', full: '左前頭部' }, frontalR: { short: '右前頭', full: '右前頭部' },
+      temporalL: { short: '左側頭', full: '左側頭部' }, temporalR: { short: '右側頭', full: '右側頭部' },
+    },
+
+    measurePreparing: '準備中…',
+    measureConnecting: 'Museと接続しています',
+
+    resultsTitle: '過去の結果',
+    backToResults: '← 一覧に戻る',
+    detailTitleDefault: '測定結果',
+    sectionRaw: 'Raw EEG(生波形)',
+    sectionPsd: 'PSD(周波数成分)',
+    sectionBand: 'Band Power(周波数帯 × チャンネル比較)',
+
+    g8summary: '⚠️ EEG interpretation rules',
+    g8body: '<ol class="rules-list"><li>1つの脳波 = 1つの心理状態ではない</li><li>1つのChannel = 1つの脳機能ではない</li><li>EEGだけで「良い／悪い」を決めない</li><li>必ずA/B比較にする</li><li>EEGと主観評価を組み合わせる</li><li>Gammaは特にアーティファクトを確認する</li><li>同じ人のBaselineからの変化を見る</li><li>1回の結果では設計原理にしない</li></ol>',
+
+    connectNoBt: 'このブラウザはWeb Bluetoothに対応していません。Chrome または Edge で開いてください。',
+    connectAlready: '接続済みです。',
+    connectSearching: 'Museを探しています…(選択画面が出ます)',
+    connectBtnDone: 'デバイス接続済み ✓',
+    connectSuccess: 'Museに接続しました。このまま「測定を始める」に進めます。',
+    connectFail: '接続に失敗しました: ',
+    homeNoBt: 'このブラウザはWeb Bluetoothに対応していません。Chrome または Edge で開いてください。',
+    resultsLoading: '読み込み中…',
+    resultsEmpty: 'まだ測定結果がありません。',
+    resultsFetchError: '結果の取得に失敗しました。このブラウザの保存領域が使えない可能性があります。',
+    chartFallback: 'グラフ描画ライブラリ(Chart.js)が読み込めませんでした。ネットワーク接続(CDNへのアクセス)を確認してください。',
+    noDataSuffix: '(データなし)',
+    uploadFail: 'アップロードに失敗しました。サーバー(python app.py)が起動しているか確認してください。',
+    registerFailGeneric: '登録に失敗しました。',
+    registerConnFail: 'サーバーに接続できませんでした。app.pyが起動しているか確認してください。',
+    registeringStatus: '登録しています…',
+    registeredStatus: '登録しました。測定を開始します…',
+    needRegisterFirst: '先に測定の登録を行ってください。',
+    museSearching: 'Museを探しています…(選択画面が出ます)',
+    museConnected: 'Museに接続しました',
+    prepareRoom: (label) => `${label} を見る準備をしてください`,
+    watchRoom: (label) => `${label} を見てください`,
+    measuring: '計測中…',
+    receiving: (n) => `受信中: ${n} サンプル(TP9)`,
+    noDataWarning: '⚠ データが受信できていません(0サンプル)。Bluetooth接続・プロトコルに問題がある可能性があります。',
+    measureHint: '測定中は体を動かさず、空間(または写真)を自然に見てください。瞬きは普通にして大丈夫です。',
+    tblBand: '帯域',
+    sectionQuality: '測定品質(ノイズ除去)',
+    conclKicker: '結論',
+    purposeTitle: 'この空間の目的',
+    introTitle: 'このアプリで分かること',
+    introMeasure: 'Muse 2 で言えるのは、前頭部の「脳の活発さ」です',
+    introHigh: '【活発】 → 活発にしたい場面(学ぶ・遊ぶ、働く・集中、にぎわう・回遊、動く・競う)に分類',
+    introLow: '【静か】 → 静かにしたい場面(待つ・休む、眠る、読む・落ち着く)に分類',
+    introLimit: 'くつろぎか退屈か、楽しさか緊張かは、多点EEGなら区別できる可能性があります',
+    purposeGreyTitle: 'Muse 2 では測定できない目的(多点EEGが必要)',
+    purposeNeedLab: '必要な測定',
+    purposePickError: '空間の目的を選んでください。',
+    conclPurposeLab: '今回の目的',
+    conclMeasuredLab: '何を測ったか',
+    viewTitle: '見るもの(必須)',
+    viewReal: '実空間', viewPhoto: '写真・パース',
+    viewNoteReal: '歩いて入った直後は動きのノイズが出やすいので、座って落ち着いてから測ります。',
+    viewNotePhoto: '2枚を同じ端末・同じ明るさ・同じ大きさで見せます。',
+    subjAskFn: (feel) => `あなたの感想: どちらが「${feel}」と感じましたか?`,
+    subjAskNote: '結果を見る前にお答えください(必須です)。違いが分からなければ「違いは分からない」を選んでください。',
+    conclPointLab: '見るポイント',
+    conclNoPurpose: '目的が登録されていない結果です。目的を選ぶと、結論が表示されます。',
+    subjTitleFn: (feel) => `【任意】あなたの感想: どちらが「${feel}」と感じましたか?(入れると結論に反映されます)`,
+    sectionData: 'データ',
+    dataIntro: '結論の元になった数値とグラフです。結論に迷ったら、ここで確かめてください。',
+    sectionTable: '帯域パワーの数値',
+    tableNote: '単位は µV²/Hz。かっこ内は「B ÷ A」(100%より大きいと B の方が大きい)。「—」はデータ不足です。',
+    sectionBody: 'からだの反応(心拍・頭の動き)',
+    bodyNote: '<li>心拍は Muse 2 の額の光センサー、頭の動きは内蔵のジャイロから計算</li><li>心拍は 2 bpm 未満、頭の動きは 20% 未満の差を「ほぼ同じ」とみなす設定</li><li>頭の動きは、どれだけ動いたかの量</li><li>—は、センサーが使えなかった、またはデータ不足</li>',
+    bodyColMetric: '指標', bodyColDiff: '差',
+    bodyHrName: '平均心拍(bpm)', bodyMotionName: '頭の動き(°/s)',
+    bodyBlocksLab: 'ブロックごと', bodySame: 'ほぼ同じ',
+    bodyHrHigher: (lab, d) => `${lab} が約${d.toFixed(1)} bpm 高い`,
+    bodyMoreMotion: (lab, f) => f >= 2 ? `${lab} が約${f.toFixed(1)}倍` : `${lab} が約${Math.round((f - 1) * 100)}%多い`,
+    bodyLnPrefix: 'からだの反応(補助)',
+    bodyLnHr: (lab, d) => `・心拍: ${lab} が約${d.toFixed(1)} bpm 高い`,
+    bodyLnHrSame: '・心拍: ほぼ同じ',
+    bodyLnAgree: (lab) => `(脳の活発さと同じ向き)`,
+    bodyLnSplit: (lab) => `(脳の活発さとは逆向き)`,
+    bodyLnMv: (lab, f) => f >= 2 ? `・頭の動き: ${lab} が約${f.toFixed(1)}倍` : `・頭の動き: ${lab} が約${Math.round((f - 1) * 100)}%多い`,
+    bodyLnMvSame: '・頭の動き: ほぼ同じ',
+    sensorStatus: (s) => s.ppg && s.imu ? '(脳波・心拍・頭の動きを記録します)' : s.ppg ? '(脳波と心拍を記録します。頭の動きは取得できません)' : s.imu ? '(脳波と頭の動きを記録します。心拍は取得できません)' : '(脳波のみ記録します)',
+    subjNone: '違いは分からない',
+    subjClear: '回答しない',
+    conclQTitle: 'ここから生まれる問い',
+    qualityNote: '1秒ごとに区切り、瞬き・体動・接触不良などで大きく乱れた区間をチャンネルごとに除外し、きれいな区間だけで解析',
+    qualityGood: '良好',
+    qualityFair: '注意',
+    qualityWhyFn: (w, n) => { const p = (v) => Math.round(v / n * 100) + '%'; return `除外の内訳 振幅が大きい ${p(w.large)} / 信号が平坦 ${p(w.flat)} / 突出した窓 ${p(w.rms)}`; },
+    qualityPoor: '不良',
+    qualityInsufficient: 'データ不足',
+    qualityLowWarning: '⚠ 採用率が低いチャンネルがあります。電極の接触(髪・汗・装着位置)を確認し、測定中は体を動かさないようにしてください。「データ不足」のチャンネルはグラフに表示されません。',
+    restLabel: '休憩',
+    restSub: '少しリラックスしてください',
+    analyzing: '解析中…',
+    saveFail: '結果の保存に失敗しました',
+    measureErrorPrefix: 'エラーが発生しました: ',
+    measureErrorSuffix: '(Bluetoothの選択画面をキャンセルした場合もこの表示になります)',
+    powerAxis: 'Power',
+  },
+  en: {
+    eyebrow: 'Designed by architects<br>An EEG measurement app',
+    headlineRow1a: 'Space to ',
+    headlineRow1b: 'think',
+    headlineRow2b: 'feel',
+    ctaMeasure: 'Start EEG measurement →',
+    suppTitle: 'What changes when architects use EEG',
+    supp1h: 'Turning "it just feels good" into a testable design hypothesis',
+    supp1p: 'Conventionally: an architect decides "a bigger window will probably feel more open" from experience and intuition.<br>With EEG: it becomes a testable question — "does a bigger window actually change this person\'s sense of openness or comfort?"',
+    supp2h: 'More judgment criteria beyond "it looks good"',
+    supp2p: 'In architecture, evaluation tends to center on visual and verbal qualities — beautiful, cool, well-balanced, open, minimal, good materiality. But when people actually experience a space, there is also: calm, tense, information-overloaded, eye-catching, wanting to stay, liking it for no clear reason, or feeling uneasy without knowing why. EEG doesn\'t directly "read" this experience, but combined with subjective ratings, it adds the physiological response to a design difference as extra observational data.',
+    supp3h: 'Turning "a difference the client can\'t put into words" into a comparative experiment',
+    supp3p: 'For example, you ask a client "which do you prefer, A or B?" They say "A." You ask "why?" and they say "I don\'t really know…" Rather than stopping there, have them experience A/B again, and from EEG + subjective ratings the designer sees things like "for this person, a bigger opening raises their \'openness\' rating but lowers their \'calm\' rating." That reframes the design problem from "maximize openness" to "preserve calm while securing openness."',
+    supp4h: 'Verifying costly architectural spaces before they are built',
+    supp4p: 'Conventionally: once a building is built, it can\'t easily be changed. At the design stage, people imagine the space from drawings, renders and models and judge from that.<br>With EEG: using digital spaces such as VR and perspective renders, we verify how people will actually feel in a space before it is built.',
+    supp5h: 'From "what this architect would do" to "what this person needs"',
+    supp5p: 'This enables personalization. For the same house, if<br>Person A: bigger window → openness↑ / comfort↑<br>Person B: bigger window → openness↑ / comfort↓<br>then, instead of a general rule that "a bigger window makes a better house," you can explore <b>what actually feels good to this particular client</b>.',
+    suppNote: '<b>* EEG doesn\'t design the space — it changes the questions the designer asks.</b>',
+
+    btnConnect: 'Connect device',
+    btnRegister: 'Start measurement',
+    btnResults: 'View past results',
+
+    backToMenu: '← Back to menu',
+    registerTitle: 'Set up a measurement',
+    spaceALabel: 'Space A',
+    spaceBLabel: 'Space B',
+    dropLabel: 'Click or drag to<br>upload an image',
+    spaceAPlaceholder: 'Name for Space A (e.g. Room A)',
+    spaceBPlaceholder: 'Name for Space B (e.g. Room B)',
+    registerStatusDefault: 'Once both Space A and Space B images are uploaded, measurement starts automatically.',
+    registerIntro: 'There is no image upload. You compare the real spaces, or photos opened on another device, while measuring.',
+    sessionTitleLabel: 'Title (optional)',
+    sessionTitlePlaceholder: 'e.g. Meeting room window size comparison / 2024-06 Office X',
+    descPlaceholder: 'Description / notes (optional) e.g. north-facing window, fluorescent light, 10 am, photo is slide 3 on another device',
+    secondsLabel: 'Seconds per measurement',
+    roundsLabel: 'Repeats',
+    btnStartMeasure: 'Start measurement',
+    btnMeasureStart: 'Start',
+    checkTitle: 'Check electrode contact', checkSub: 'Before measuring, check that the EEG is coming through steadily (share of the last 6 seconds that was usable)',
+    checkNext: 'Looks good, next',
+    checkHint: 'Until the forehead (AF7/AF8) shows "Good", part your hair and press the electrodes firmly against your forehead.',
+    checkNoSignal: 'No EEG is arriving. Check that the Muse is on and connected to the browser.',
+    batteryNow: (n) => `Muse battery: ${n}%`,
+    batteryLow: (n) => `The Muse battery is low (${n}%). A low battery can make the signal erratic. Charge it (3 hours or more) before measuring.`,
+    checkWaiting: 'Receiving the signal…',
+    artCaption: 'When your brain becomes more active, Villa Savoye becomes more active too.',
+    psdXTitle: 'Frequency (Hz)',
+    checkEars: 'Forehead (AF7/AF8) is good. Behind the ears (TP9/TP10) is not touching the skin. Move the arm tips aside from the hair and press them against the skin behind the ears. This app decides from the forehead, so you can continue as is.',
+    checkHuge: 'The signal is far too large (at the limit of the measurable range). The electrodes may not be touching the skin. Refit the device and press the electrodes on the forehead and behind the ears firmly against the skin.',
+    waveShow: 'Show waveform', waveHide: 'Hide waveform',
+    waveScale: 'Last 4 seconds. Center is 0, faint lines are ±100 µV (clipped at ±170 µV)',
+    btnAbort: 'Cancel and back to menu',
+    measureReadySub: 'Press "Start" when you are ready to look at the space (or the photo)',
+    measureCountdownSub: 'Measurement is about to begin',
+    measureProgress: (i, n, sec) => `Block ${i} / ${n} (${sec} s each)`,
+    rawLegend: 'Red-shaded intervals are parts judged too noisy (blinks, movement, poor contact) and excluded from the analysis, per channel.',
+    settingsSummary: (st) => `Settings: ${st.seconds} s × ${st.rounds} repeats (order ${st.order ? st.order.split('').join('→') : '-'})`,
+    sectionBrain: 'Brain map (where the difference appeared)',
+    brainIntro: 'Muse 2 only measures four points: the forehead and just behind the ears. Colors show the difference in power in the chosen band between Space A and Space B. Hatched regions cannot be measured by Muse 2.',
+    brainAria: 'Brain map seen from above the head',
+    brainFront: 'Front',
+    brainMeasured: 'Measured by Muse 2',
+    brainUnmeasured: 'Not measured by Muse 2',
+    brainNoData: 'No difference can be shown (some channels have too little data).',
+    brainNoDiff: (band) => `In ${band}, no electrode area shows a notable difference (guideline: under ±20%).`,
+    brainTop: (band, region, ch, la, lb, d) => {
+      const ratio = Math.exp(Math.abs(d));
+      const hi = d > 0 ? lb : la;
+      const lo = d > 0 ? la : lb;
+      return `In ${band}, the largest difference was near the ${region} (${ch}): ${hi} was about ${ratio.toFixed(2)}× higher than ${lo}.`;
+    },
+    brainMissing: '* Electrodes with too little data to compare are left uncolored.',
+    brainBandCaution: (band) => band === 'Delta'
+      ? '* Delta (especially on the forehead) is easily affected by residual blinks and movement. Interpret with care even after exclusion.'
+      : '* Gamma easily picks up muscle activity (face, jaw, neck). Treat it as a supporting indicator.',
+    brainRegion: {
+      frontal: { short: 'Frontal', full: 'Frontal lobe', role: 'Attention, planning, judgment and emotion regulation (executive function). An observation point for what someone attends to and how they engage.', site: 'Measured at: AF7 (left frontal) / AF8 (right frontal)' },
+      temporal: { short: 'Temporal', full: 'Temporal lobe', role: 'Processing of sound and language, memory, recognition of objects and faces. An observation point for the sound environment and ties to memory. (The hippocampus, a memory center, is deep and cannot be measured directly by Muse 2.)', site: 'Measured at: TP9 (left) / TP10 (right)' },
+      central: { short: 'Central', full: 'Central (motor / somatosensory)', role: 'Commands for movement and processing of touch. The mu rhythm changes with imagined or observed movement.', site: 'No sensor (not measurable with Muse 2)' },
+      parietal: { short: 'Parietal', full: 'Parietal lobe', role: 'Grasping space, the position of one\'s own body, and where attention is directed. An important region for spatial perception in architecture.', site: 'No sensor (not measurable with Muse 2)' },
+      occipital: { short: 'Occipital', full: 'Occipital lobe', role: 'Visual processing (brightness, form, color, depth). Alpha waves are strongest here with eyes closed.', site: 'No sensor (not measurable with Muse 2)' },
+      frontalL: { short: 'L frontal', full: 'left frontal region' }, frontalR: { short: 'R frontal', full: 'right frontal region' },
+      temporalL: { short: 'L temporal', full: 'left temporal region' }, temporalR: { short: 'R temporal', full: 'right temporal region' },
+    },
+
+    measurePreparing: 'Preparing…',
+    measureConnecting: 'Connecting to Muse',
+
+    resultsTitle: 'Past results',
+    backToResults: '← Back to list',
+    detailTitleDefault: 'Measurement result',
+    sectionRaw: 'Raw EEG (raw waveform)',
+    sectionPsd: 'PSD (frequency content)',
+    sectionBand: 'Band Power (band × channel comparison)',
+
+    g8summary: '⚠️ EEG interpretation rules',
+    g8body: '<ol class="rules-list"><li>One brainwave ≠ one psychological state</li><li>One channel ≠ one brain function</li><li>Never decide "good" or "bad" from EEG alone</li><li>Always use an A/B comparison</li><li>Combine EEG with subjective ratings</li><li>Especially check Gamma for artifacts</li><li>Look at change from that same person\'s baseline</li><li>Never turn a single result into a design principle</li></ol>',
+
+    connectNoBt: 'This browser does not support Web Bluetooth. Please open this in Chrome or Edge.',
+    connectAlready: 'Already connected.',
+    connectSearching: 'Searching for Muse… (a picker will appear)',
+    connectBtnDone: 'Device connected ✓',
+    connectSuccess: 'Connected to Muse. You can go on to "Start measurement."',
+    connectFail: 'Connection failed: ',
+    homeNoBt: 'This browser does not support Web Bluetooth. Please open this in Chrome or Edge.',
+    resultsLoading: 'Loading…',
+    resultsEmpty: 'No measurement results yet.',
+    resultsFetchError: 'Failed to load results. Storage in this browser may be unavailable.',
+    chartFallback: 'Could not load the charting library (Chart.js). Please check your network connection (access to the CDN).',
+    noDataSuffix: ' (no data)',
+    uploadFail: 'Upload failed. Please check that the server (python app.py) is running.',
+    registerFailGeneric: 'Registration failed.',
+    registerConnFail: 'Could not connect to the server. Please check that app.py is running.',
+    registeringStatus: 'Registering…',
+    registeredStatus: 'Registered. Starting measurement…',
+    needRegisterFirst: 'Please set up the measurement first.',
+    museSearching: 'Searching for Muse… (a picker will appear)',
+    museConnected: 'Connected to Muse',
+    prepareRoom: (label) => `Please prepare to view ${label}`,
+    watchRoom: (label) => `Please look at ${label}`,
+    measuring: 'Measuring…',
+    receiving: (n) => `Receiving: ${n} samples (TP9)`,
+    noDataWarning: '⚠ No data received (0 samples). There may be a Bluetooth connection or protocol issue.',
+    measureHint: 'Please keep still and look at the space (or photo) naturally. Normal blinking is fine.',
+    tblBand: 'Band',
+    sectionQuality: 'Signal quality (noise removal)',
+    conclKicker: 'Conclusion',
+    purposeTitle: 'Purpose of this space',
+    introTitle: 'What this app can tell you',
+    introMeasure: 'Muse 2 can state: frontal "brain activity"',
+    introHigh: '【Active】 → spaces meant to be lively (learning / playing, working, bustling, moving)',
+    introLow: '【Quiet】 → spaces meant to be quiet (waiting / resting, sleeping, reading)',
+    introLimit: 'Multi-channel EEG may be able to tell ease from boredom, or enjoyment from tension',
+    purposeGreyTitle: 'Purposes Muse 2 cannot measure (multi-channel EEG needed)',
+    purposeNeedLab: 'Needed',
+    purposePickError: 'Please choose the purpose of the space.',
+    conclPurposeLab: 'Purpose',
+    conclMeasuredLab: 'What was measured',
+    viewTitle: 'What you look at (required)',
+    viewReal: 'Real space', viewPhoto: 'Photo / render',
+    viewNoteReal: 'Right after walking in, movement noise is likely, so sit down, settle, then measure.',
+    viewNotePhoto: 'Show both images on the same device, at the same brightness and the same size.',
+    subjAskFn: (feel) => `Your impression: which one felt "${feel}"?`,
+    subjAskNote: 'Please answer before seeing the result (required). If you cannot tell, choose "Cannot tell the difference".',
+    conclPointLab: 'What to look at',
+    conclNoPurpose: 'This result has no registered purpose. Choose one to see the conclusion.',
+    subjTitleFn: (feel) => `[Optional] Your impression: which one felt "${feel}"? (it is reflected in the conclusion)`,
+    sectionData: 'Data',
+    dataIntro: 'The numbers and graphs behind the conclusion. If the conclusion leaves you unsure, check here.',
+    sectionTable: 'Band power values',
+    tableNote: 'Unit: µV²/Hz. In parentheses: B ÷ A (above 100% means B is larger). "—" means not enough data.',
+    sectionBody: 'Body response (heart rate and head movement)',
+    bodyNote: '<li>Heart rate is computed from the Muse 2 forehead optical sensor, head movement from the built-in gyroscope</li><li>Differences under 2 bpm (heart rate) or 20% (head movement) are treated as "about the same"</li><li>Head movement is the amount of movement</li><li>— means the sensor was unavailable or there was not enough data</li>',
+    bodyColMetric: 'Measure', bodyColDiff: 'Difference',
+    bodyHrName: 'Mean heart rate (bpm)', bodyMotionName: 'Head movement (°/s)',
+    bodyBlocksLab: 'Per block', bodySame: 'About the same',
+    bodyHrHigher: (lab, d) => `${lab} is about ${d.toFixed(1)} bpm higher`,
+    bodyMoreMotion: (lab, f) => f >= 2 ? `${lab} has about ${f.toFixed(1)}x as much` : `${lab} has about ${Math.round((f - 1) * 100)}% more`,
+    bodyLnPrefix: 'Body response (supporting)',
+    bodyLnHr: (lab, d) => `- Heart rate: about ${d.toFixed(1)} bpm higher in ${lab}`,
+    bodyLnHrSame: '- Heart rate: about the same',
+    bodyLnAgree: (lab) => ` (same direction as brain activity)`,
+    bodyLnSplit: (lab) => ` (opposite to brain activity)`,
+    bodyLnMv: (lab, f) => f >= 2 ? `- Head movement: about ${f.toFixed(1)}x in ${lab}` : `- Head movement: about ${Math.round((f - 1) * 100)}% more in ${lab}`,
+    bodyLnMvSame: '- Head movement: about the same',
+    sensorStatus: (s) => s.ppg && s.imu ? '(recording EEG, heart rate and head movement)' : s.ppg ? '(recording EEG and heart rate; head movement unavailable)' : s.imu ? '(recording EEG and head movement; heart rate unavailable)' : '(recording EEG only)',
+    subjNone: 'Cannot tell the difference',
+    subjClear: 'Skip',
+    conclQTitle: 'Questions this raises',
+    qualityNote: 'The signal is split into 1-second windows, intervals badly disturbed by blinks, body movement or poor contact are excluded per channel, and only the clean intervals are analyzed',
+    qualityGood: 'Good',
+    qualityFair: 'Caution',
+    qualityWhyFn: (w, n) => { const p = (v) => Math.round(v / n * 100) + '%'; return `rejected: too large ${p(w.large)} / flat ${p(w.flat)} / outlier ${p(w.rms)}`; },
+    qualityPoor: 'Poor',
+    qualityInsufficient: 'Not enough data',
+    qualityLowWarning: '⚠ Some channels have a low acceptance rate. Check electrode contact (hair, sweat, fit) and keep still during measurement. Channels marked "Not enough data" are not plotted.',
+    restLabel: 'Rest',
+    restSub: 'Please relax for a moment',
+    analyzing: 'Analyzing…',
+    saveFail: 'Failed to save the result',
+    measureErrorPrefix: 'An error occurred: ',
+    measureErrorSuffix: ' (this also appears if you canceled the Bluetooth picker)',
+    powerAxis: 'Power',
+  }
+};
+
+let currentLang = localStorage.getItem('abLang') || 'ja';
+let currentDetail = null; // 詳細画面に表示中の結果(言語切替時に動的な表を再描画するため)
+
+function t(key){
+  const v = (I18N[currentLang] && I18N[currentLang][key] !== undefined) ? I18N[currentLang][key] : I18N.ja[key];
+  return v;
+}
+
+function setLanguage(lang){
+  currentLang = lang;
+  try { localStorage.setItem('abLang', lang); } catch(e){}
+  applyLanguage();
+}
+
+function applyLanguage(){
+  document.documentElement.lang = currentLang;
+  document.getElementById('langBtnJa').classList.toggle('active', currentLang === 'ja');
+  document.getElementById('langBtnEn').classList.toggle('active', currentLang === 'en');
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = t(key);
+    if (typeof val === 'string') el.textContent = val;
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.getAttribute('data-i18n-html');
+    const val = t(key);
+    if (typeof val === 'string') el.innerHTML = val;
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    const val = t(key);
+    if (typeof val === 'string') el.placeholder = val;
+  });
+  if (typeof renderPurposePicker === 'function') renderPurposePicker();
+  if (typeof renderViewPicker === 'function') renderViewPicker();
+  const detailScreen = document.getElementById('screen-detail');
+  if (currentDetail && detailScreen && detailScreen.classList.contains('active')) renderDetailPanels(currentDetail);
+}
+
+document.addEventListener('DOMContentLoaded', applyLanguage);
+
+/* =========================================================================
+   Muse (2016 / 2 / S) Web Bluetooth クライアント(自前実装・依存ライブラリなし)
+   公開されているMuseのBLEプロトコル(muse-js / muse-lsl等のOSSで使われているものと
+   同じ仕様)を素のWeb Bluetooth APIで実装しています。実機での動作確認を必ず行ってください。
+   ========================================================================= */
+
+const MUSE_SERVICE = 0xfe8d;
+const CONTROL_CHAR = '273e0001-4c4d-454d-96be-f03bac821358';
+const EEG_CHARS = {
+  tp9:  '273e0003-4c4d-454d-96be-f03bac821358',
+  af7:  '273e0004-4c4d-454d-96be-f03bac821358',
+  af8:  '273e0005-4c4d-454d-96be-f03bac821358',
+  tp10: '273e0006-4c4d-454d-96be-f03bac821358',
+};
+const CHANNEL_ORDER = ['tp9', 'af7', 'af8', 'tp10'];
+const CHANNEL_LABELS = { tp9: 'TP9', af7: 'AF7', af8: 'AF8', tp10: 'TP10' };
+const CHANNEL_COLORS = { tp9: '#20c9d6', af7: '#d626c9', af8: '#f2a900', tp10: '#4c6ef5' };
+const SAMPLE_RATE = 256; // Muse EEGの公称サンプリングレート(Hz)
+// 心拍用の光センサー(PPG)と、頭の動き用のジャイロ・加速度センサー(Muse 2に内蔵。任意)
+const MUSE_UUID_TAIL = '-4c4d-454d-96be-f03bac821358';
+const PPG_CHARS = { ir: '273e0010' + MUSE_UUID_TAIL, red: '273e0011' + MUSE_UUID_TAIL };
+const GYRO_CHAR = '273e0009' + MUSE_UUID_TAIL;
+const TELEMETRY_CHAR = '273e000b' + MUSE_UUID_TAIL;   // 電池残量など
+const BATTERY_LOW = 50;   // この%未満で警告
+const ACCEL_CHAR = '273e000a' + MUSE_UUID_TAIL;
+const EEG_ONLY = /[?&]eeg=1/.test(location.search);   // 脳波のみ(従来の設定 p21)で動かす
+const PPG_RATE = 64;               // PPGのサンプリングレート(Hz)
+const GYRO_SCALE = 0.0074768;      // °/s per LSB
+const ACCEL_SCALE = 0.0000610352;  // g per LSB
+
+function encodeCommand(cmd) {
+  const encoded = new TextEncoder().encode('X' + cmd + '\n');
+  encoded[0] = encoded.length - 1;
+  return encoded;
+}
+
+function decodeEEGPacket(dataView) {
+  const bytes = new Uint8Array(dataView.buffer, dataView.byteOffset, dataView.byteLength);
+  const payload = bytes.slice(2); // 18 bytes
+  const samples = new Array(12);
+  for (let i = 0; i < 12; i++) {
+    let raw;
+    const base = Math.floor(i * 3 / 2);
+    if (i % 2 === 0) {
+      raw = (payload[base] << 4) | (payload[base + 1] >> 4);
+    } else {
+      raw = ((payload[base] & 0x0f) << 8) | payload[base + 1];
+    }
+    samples[i] = 0.48828125 * (raw - 2048); // マイクロボルトへスケーリング
+  }
+  return samples;
+}
+
+function decodePpgPacket(dataView) {
+  const b = new Uint8Array(dataView.buffer, dataView.byteOffset, dataView.byteLength);
+  const out = [];
+  for (let i = 2; i + 2 < b.length; i += 3) out.push((b[i] << 16) | (b[i + 1] << 8) | b[i + 2]);
+  return out;   // 24bit符号なし(未加工のADC値)
+}
+
+function decodeImuPacket(dataView, scale) {
+  const out = [];
+  if (dataView.byteLength < 20) return out;
+  for (let i = 0; i < 3; i++) {
+    const o = 2 + i * 6;
+    out.push([dataView.getInt16(o, false) * scale, dataView.getInt16(o + 2, false) * scale, dataView.getInt16(o + 4, false) * scale]);
+  }
+  return out;
+}
+
+function emptyBodyBuf() { return { ir: [], red: [], gyro: [], accel: [], t0: 0, t1: 0 }; }
+
+class MuseClient {
+  constructor() {
+    this.device = null;
+    this.gatt = null;
+    this.controlChar = null;
+    this.eegChars = {};
+    this.capturing = false;
+    this.buffers = { tp9: [], af7: [], af8: [], tp10: [] };
+    this.eegCount = 0;
+    this.live = { tp9: [], af7: [], af8: [], tp10: [] };   // 接触確認用の直近の波形
+    this.battery = null;   // 電池残量(%)。取得できなければ null
+    this.sensors = { ppg: false, imu: false };
+    this.bodyBuf = emptyBodyBuf();
+    this.lastBody = emptyBodyBuf();
+  }
+
+  async connect() {
+    this.device = await navigator.bluetooth.requestDevice({
+      filters: [{ services: [MUSE_SERVICE] }],
+    });
+    this.gatt = await this.device.gatt.connect();
+    const service = await this.gatt.getPrimaryService(MUSE_SERVICE);
+    this.controlChar = await service.getCharacteristic(CONTROL_CHAR);
+    try { await this.controlChar.startNotifications(); } catch (e) { /* 任意 */ }
+    try {
+      const tel = await service.getCharacteristic(TELEMETRY_CHAR);
+      await tel.startNotifications();
+      tel.addEventListener('characteristicvaluechanged', (e) => {
+        const v = e.target.value;
+        if (v.byteLength >= 4) {
+          const pct = v.getUint16(2, false) / 512;   // 16bit ÷ 512 = 電池残量(%)
+          if (pct >= 0 && pct <= 100) this.battery = Math.round(pct);
+        }
+      });
+    } catch (err) { /* 電池表示は任意。取得できなくても測定は続ける */ }
+    for (const key of CHANNEL_ORDER) {
+      const ch = await service.getCharacteristic(EEG_CHARS[key]);
+      await ch.startNotifications();
+      ch.addEventListener('characteristicvaluechanged', (e) => {
+        this.eegCount++;
+        this.lastPkt = this.lastPkt || {};
+        this.lastPkt[key] = Array.from(new Uint8Array(e.target.value.buffer, e.target.value.byteOffset, e.target.value.byteLength)).map(x => x.toString(16).padStart(2, '0')).join(' ');
+        const samples = decodeEEGPacket(e.target.value);
+        const lv = this.live[key];
+        for (const v of samples) lv.push(v);
+        if (lv.length > LIVE_MAX) lv.splice(0, lv.length - LIVE_MAX);
+        if (!this.capturing) return;
+        this.buffers[key].push(...samples);
+      });
+      this.eegChars[key] = ch;
+    }
+    // 心拍(額の光センサー)と頭の動き(ジャイロ・加速度)は任意。取得できなくても脳波だけで測定を続ける
+    this.sensors = { ppg: false, imu: false };
+    if (EEG_ONLY) return;   // ?eeg=1 : 脳波だけで動かす(切り分け用)
+    try {
+      const irC = await service.getCharacteristic(PPG_CHARS.ir);
+      const redC = await service.getCharacteristic(PPG_CHARS.red);
+      await irC.startNotifications();
+      await redC.startNotifications();
+      irC.addEventListener('characteristicvaluechanged', (e) => { if (this.capturing) this.bodyBuf.ir.push(...decodePpgPacket(e.target.value)); });
+      redC.addEventListener('characteristicvaluechanged', (e) => { if (this.capturing) this.bodyBuf.red.push(...decodePpgPacket(e.target.value)); });
+      this.sensors.ppg = true;
+    } catch (err) { this.sensors.ppg = false; }
+    try {
+      const gC = await service.getCharacteristic(GYRO_CHAR);
+      const aC = await service.getCharacteristic(ACCEL_CHAR);
+      await gC.startNotifications();
+      await aC.startNotifications();
+      gC.addEventListener('characteristicvaluechanged', (e) => { if (this.capturing) this.bodyBuf.gyro.push(...decodeImuPacket(e.target.value, GYRO_SCALE)); });
+      aC.addEventListener('characteristicvaluechanged', (e) => { if (this.capturing) this.bodyBuf.accel.push(...decodeImuPacket(e.target.value, ACCEL_SCALE)); });
+      this.sensors.imu = true;
+    } catch (err) { this.sensors.imu = false; }
+  }
+
+  async startStreaming() {
+    const usePpg = this.sensors.ppg;
+    await this.controlChar.writeValue(encodeCommand('h'));   // halt
+    await this.controlChar.writeValue(encodeCommand(usePpg ? 'p50' : 'p21')); // preset(p50 = 脳波 + 心拍用の光センサー / p21 = 脳波)
+    await this.controlChar.writeValue(encodeCommand('s'));
+    await this.controlChar.writeValue(encodeCommand('d'));   // データ配信開始
+    if (usePpg) {
+      // 脳波が流れてこない場合は、従来の設定(脳波のみ)に戻して測定を続ける
+      const before = this.eegCount;
+      await new Promise(r => setTimeout(r, 2000));
+      if (this.eegCount === before) {
+        await this.controlChar.writeValue(encodeCommand('h'));
+        await this.controlChar.writeValue(encodeCommand('p21'));
+        await this.controlChar.writeValue(encodeCommand('s'));
+    await this.controlChar.writeValue(encodeCommand('d'));
+        this.sensors.ppg = false;
+      }
+    }
+  }
+
+  async stopStreaming() {
+    try { await this.controlChar.writeValue(encodeCommand('h')); } catch (e) { /* ignore */ }
+  }
+
+  startCapture() {
+    this.buffers = { tp9: [], af7: [], af8: [], tp10: [] };
+    this.bodyBuf = emptyBodyBuf();
+    this.bodyBuf.t0 = performance.now();
+    this.capturing = true;
+  }
+
+  stopCapture() {
+    this.capturing = false;
+    this.bodyBuf.t1 = performance.now();
+    this.lastBody = this.bodyBuf;
+    return this.buffers;
+  }
+
+  disconnect() {
+    try { if (this.gatt) this.gatt.disconnect(); } catch (e) { /* ignore */ }
+  }
+}
+
+/* ------------------------- FFT・周波数解析 ------------------------- */
+
+function hanningWindow(n) {
+  const w = new Float64Array(n);
+  for (let i = 0; i < n; i++) w[i] = 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / (n - 1));
+  return w;
+}
+
+function fft(re, im) {
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) {
+    let bit = n >> 1;
+    for (; j & bit; bit >>= 1) j ^= bit;
+    j ^= bit;
+    if (i < j) { [re[i], re[j]] = [re[j], re[i]]; [im[i], im[j]] = [im[j], im[i]]; }
+  }
+  for (let len = 2; len <= n; len <<= 1) {
+    const ang = (-2 * Math.PI) / len;
+    const wr = Math.cos(ang), wi = Math.sin(ang);
+    for (let i = 0; i < n; i += len) {
+      let curWr = 1, curWi = 0;
+      for (let k = 0; k < len / 2; k++) {
+        const uRe = re[i + k], uIm = im[i + k];
+        const vRe = re[i + k + len / 2] * curWr - im[i + k + len / 2] * curWi;
+        const vIm = re[i + k + len / 2] * curWi + im[i + k + len / 2] * curWr;
+        re[i + k] = uRe + vRe; im[i + k] = uIm + vIm;
+        re[i + k + len / 2] = uRe - vRe; im[i + k + len / 2] = uIm - vIm;
+        const nWr = curWr * wr - curWi * wi;
+        curWi = curWr * wi + curWi * wr;
+        curWr = nWr;
+      }
+    }
+  }
+}
+
+const BANDS = { Delta: [1, 4], Theta: [4, 8], Alpha: [8, 13], Beta: [13, 30], Gamma: [30, 50] };
+
+/* ------------------- ノイズ除去(瞬き・体動などのアーティファクト対策) -------------------
+ * Museは4chしかなく、1つの電極が乱れても他のチャンネルで補えない。そこで
+ *   ① 信号を1秒ごとの窓に区切り
+ *   ② 窓ごと・チャンネルごとに「乱れているか」を判定し
+ *   ③ きれいな窓だけでスペクトルを平均する(Welch法)
+ * 瞬きはAF7/AF8に強く出るため、除外はチャンネルごとに独立して行い、
+ * TP9/TP10の有効なデータまで捨てないようにしている。 */
+const EPOCH_SEC = 1;          // 解析窓の長さ(秒)
+const EPOCH_STEP_SEC = 0.5;   // 窓のずらし幅(50%オーバーラップ)
+const PTP_LIMIT_UV = 150;     // 窓内の(最大-最小)がこれを超えたら除外(瞬き・体動・接触不良)。ドリフトを除いた波形で判定する
+const HP_HZ = 1;              // 除外の判定は、ゆっくりした揺れ(ドリフト)を除いた波形で行う
+const FLAT_LIMIT_UV = 1;      // これ未満は信号が来ていない(電極が浮いている)とみなして除外
+const RMS_Z_LIMIT = 3.5;      // 本人の典型値より極端に大きい窓を除外(筋電・小さめの体動対策)
+const LIVE_MAX = 256 * 8;      // 接触確認用に持っておく直近の長さ(8秒)
+const MIN_CLEAN_EPOCHS = 8;   // 採用できた窓がこれ未満のチャンネルは「データ不足」として扱う
+const MAINS_HZ = [50, 60];    // 電源ノイズ(東日本50Hz / 西日本60Hz)
+const SPECTRUM_NFFT = 512;    // ゼロ詰めして0.5Hz刻みで表示(実際の周波数分解能は1Hz)
+
+function notchCoeffs(f0, q) {
+  const w0 = (2 * Math.PI * f0) / SAMPLE_RATE;
+  const alpha = Math.sin(w0) / (2 * q);
+  const c = Math.cos(w0);
+  const a0 = 1 + alpha;
+  return { b0: 1 / a0, b1: (-2 * c) / a0, b2: 1 / a0, a1: (-2 * c) / a0, a2: (1 - alpha) / a0 };
+}
+
+function biquadPass(x, k) {
+  const y = new Float64Array(x.length);
+  // ノッチは直流ゲインが1なので、内部状態を先頭値で初期化すると立ち上がりの揺れが出ない
+  let x1 = x[0], x2 = x[0], y1 = x[0], y2 = x[0];
+  for (let i = 0; i < x.length; i++) {
+    const v = k.b0 * x[i] + k.b1 * x1 + k.b2 * x2 - k.a1 * y1 - k.a2 * y2;
+    x2 = x1; x1 = x[i]; y2 = y1; y1 = v;
+    y[i] = v;
+  }
+  return y;
+}
+
+// 順方向→逆方向の2回かけて位相ずれをなくす(ゼロ位相フィルタ)
+function zeroPhaseNotch(x, f0, q = 30) {
+  const k = notchCoeffs(f0, q);
+  const fwd = biquadPass(x, k);
+  fwd.reverse();
+  const back = biquadPass(fwd, k);
+  back.reverse();
+  return back;
+}
+
+// ハイパスフィルタ(ゆっくりした揺れを除く)。判定専用で、スペクトルの計算には使わない
+function highpassCoeffs(f0, q = Math.SQRT1_2) {
+  const w0 = (2 * Math.PI * f0) / SAMPLE_RATE;
+  const alpha = Math.sin(w0) / (2 * q), c = Math.cos(w0), a0 = 1 + alpha;
+  return { b0: ((1 + c) / 2) / a0, b1: (-(1 + c)) / a0, b2: ((1 + c) / 2) / a0, a1: (-2 * c) / a0, a2: (1 - alpha) / a0 };
+}
+function zeroPhaseHighpass(x, f0) {
+  const k = highpassCoeffs(f0);
+  const x0 = x[0];
+  const xs = new Float64Array(x.length);
+  for (let i = 0; i < x.length; i++) xs[i] = x[i] - x0;   // 直流分を引いて、立ち上がりの揺れを防ぐ
+  const fwd = biquadPass(xs, k);
+  fwd.reverse();
+  const back = biquadPass(fwd, k);
+  back.reverse();
+  return back;
+}
+
+// 窓内の平均と直線トレンド(ゆっくりしたドリフト)を取り除く
+function detrendLinear(seg) {
+  const n = seg.length;
+  const tm = (n - 1) / 2;
+  let ym = 0;
+  for (let i = 0; i < n; i++) ym += seg[i];
+  ym /= n;
+  let num = 0, den = 0;
+  for (let i = 0; i < n; i++) { num += (i - tm) * (seg[i] - ym); den += (i - tm) * (i - tm); }
+  const slope = den ? num / den : 0;
+  const out = new Float64Array(n);
+  for (let i = 0; i < n; i++) out[i] = seg[i] - ym - slope * (i - tm);
+  return out;
+}
+
+function median(arr) {
+  const s = Array.from(arr).sort((a, b) => a - b);
+  const m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+
+// きれいな窓だけを集めて、パワースペクトル密度(µV²/Hz)を平均する
+function welchAverage(segs, len) {
+  const win = hanningWindow(len);
+  let w2 = 0;
+  for (let i = 0; i < len; i++) w2 += win[i] * win[i];
+  const nfft = SPECTRUM_NFFT;
+  const half = nfft / 2;
+  const acc = new Float64Array(half);
+  for (const seg of segs) {
+    const re = new Float64Array(nfft);
+    const im = new Float64Array(nfft);
+    for (let i = 0; i < len; i++) re[i] = seg[i] * win[i];
+    fft(re, im);
+    for (let k = 1; k < half; k++) acc[k] += (2 * (re[k] * re[k] + im[k] * im[k])) / (SAMPLE_RATE * w2);
+  }
+  for (let k = 0; k < half; k++) acc[k] /= segs.length;
+  return { powers: acc, nfft };
+}
+
+// 1チャンネル分(複数ブロックの時系列)から、ノイズ除去済みスペクトルと「どれだけ使えたか」を返す
+// blocks: [Array<number>, ...](1ブロック=1回の測定)。除外した区間は rejected に秒単位で返す(ブロックを連結した時間軸)。
+function analyzeChannel(blocks) {
+  if (blocks.length && typeof blocks[0] === 'number') blocks = [blocks]; // 単一配列も受け付ける
+  const len = Math.round(EPOCH_SEC * SAMPLE_RATE);
+  const step = Math.round(EPOCH_STEP_SEC * SAMPLE_RATE);
+
+  const epochs = [];
+  const masks = [];     // ブロックごとの「採用された窓に含まれるサンプル」のマスク
+  const offsets = [];   // ブロックの開始位置(連結時間軸, サンプル)
+  let offset = 0;
+  blocks.forEach((samples, bi) => {
+    offsets.push(offset);
+    masks.push(new Uint8Array(samples.length));
+    offset += samples.length;
+    if (samples.length < len) return;
+    let x = Float64Array.from(samples);
+    for (const f of MAINS_HZ) x = zeroPhaseNotch(x, f);
+    const xh = zeroPhaseHighpass(x, HP_HZ);   // 判定用(ドリフトを除いた波形)
+    // 1) 窓に区切って指標を計算し、明らかに乱れた窓(瞬き・体動・接触不良・信号なし)を除外
+    for (let st = 0; st + len <= x.length; st += step) {
+      const seg = detrendLinear(x.subarray(st, st + len));
+      const hseg = xh.subarray(st, st + len);
+      let mn = Infinity, mx = -Infinity, sq = 0, finite = true;
+      for (let i = 0; i < len; i++) {
+        const v = hseg[i];
+        if (!Number.isFinite(v)) { finite = false; break; }
+        if (v < mn) mn = v;
+        if (v > mx) mx = v;
+        sq += v * v;
+      }
+      const ptp = mx - mn;
+      const flat = finite && ptp < FLAT_LIMIT_UV, large = finite && ptp > PTP_LIMIT_UV;
+      epochs.push({
+        seg, bi, st, flat, large, rmsOut: false,
+        ok: finite && !flat && !large,
+        logRms: Math.log(Math.sqrt(sq / len) + 1e-9),
+      });
+    }
+  });
+
+  // 2) 残った窓のうち、本人の典型値より極端に大きいものを追加で除外(中央値とMADによるロバストz値)
+  const passed = epochs.filter(e => e.ok);
+  if (passed.length >= MIN_CLEAN_EPOCHS) {
+    const med = median(passed.map(e => e.logRms));
+    const mad = median(passed.map(e => Math.abs(e.logRms - med)));
+    const sigma = 1.4826 * mad;
+    if (sigma > 0) passed.forEach(e => { if ((e.logRms - med) / sigma > RMS_Z_LIMIT) { e.ok = false; e.rmsOut = true; } });
+  }
+
+  // 3) 採用された窓に一度も含まれなかったサンプル = 「捨てた区間」(波形上で色付けするため)
+  const clean = epochs.filter(e => e.ok);
+  clean.forEach(e => masks[e.bi].fill(1, e.st, e.st + len));
+  const rejected = [];
+  blocks.forEach((samples, bi) => {
+    const m = masks[bi];
+    let i = 0;
+    while (i < m.length) {
+      if (m[i]) { i++; continue; }
+      let j = i;
+      while (j < m.length && !m[j]) j++;
+      rejected.push([+((offsets[bi] + i) / SAMPLE_RATE).toFixed(3), +((offsets[bi] + j) / SAMPLE_RATE).toFixed(3)]);
+      i = j;
+    }
+  });
+
+  const total = epochs.length;
+  const kept = clean.length;
+  const rate = total ? kept / total : 0;
+  // 通常の瞬き(毎分15〜20回)では額(AF7/AF8)の採用率は6割前後になるのが自然なので、判定はやや緩めにしている
+  const status = kept < MIN_CLEAN_EPOCHS ? 'poor' : rate >= 0.6 ? 'good' : rate >= 0.3 ? 'fair' : 'poor';
+  const spectrum = kept < MIN_CLEAN_EPOCHS ? null : welchAverage(clean.map(e => e.seg), len);
+  const why = { flat: epochs.filter(e => e.flat).length, large: epochs.filter(e => e.large).length, rms: epochs.filter(e => e.rmsOut).length };
+  return { spectrum, total, kept, rate, status, rejected, nSamples: offset, why };
+}
+
+// スペクトルから周波数帯(δ/θ/α/β/γ)の平均パワーを計算
+function bandPowerFromSpectrum(spectrum) {
+  const result = {};
+  if (!spectrum) {
+    for (const band of Object.keys(BANDS)) result[band] = 0;
+    return result;
+  }
+  const { powers, nfft } = spectrum;
+  for (const [band, [lo, hi]] of Object.entries(BANDS)) {
+    const kLo = Math.floor((lo * nfft) / SAMPLE_RATE);
+    const kHi = Math.ceil((hi * nfft) / SAMPLE_RATE);
+    let sum = 0, count = 0;
+    for (let k = kLo; k <= kHi && k < powers.length; k++) { sum += powers[k]; count++; }
+    result[band] = count ? sum / count : 0;
+  }
+  return result;
+}
+
+// 0〜maxFreqHzを numPoints 点に均等分割してPSD表示用の値を作る(②PSD表示用)
+function psdForDisplay(spectrum, maxFreq = 50, numPoints = 100) {
+  const freqs = [];
+  const vals = [];
+  for (let p = 0; p < numPoints; p++) {
+    const freq = (p / numPoints) * maxFreq;
+    freqs.push(+freq.toFixed(2));
+    if (!spectrum) { vals.push(null); continue; }
+    const { powers, nfft } = spectrum;
+    const k = Math.round((freq * nfft) / SAMPLE_RATE);
+    vals.push(k < powers.length ? powers[k] : 0);
+  }
+  return { freqs, powers: vals };
+}
+
+// 生波形を表示用に軽量化する: RAW_BIN サンプルごとの平均(=32Hz)。DC成分(Museは約±800µVのオフセットを持つ)はブロックごとの中央値で引く
+const RAW_BIN = 8;
+function rawForDisplay(blocks) {
+  const out = [];
+  const blockLens = [];
+  blocks.forEach(samples => {
+    if (!samples.length) { blockLens.push(0); return; }
+    const sorted = Array.from(samples).filter(Number.isFinite).sort((p, q) => p - q);
+    const med = sorted.length ? sorted[sorted.length >> 1] : 0;
+    let n = 0;
+    for (let i = 0; i + RAW_BIN <= samples.length; i += RAW_BIN) {
+      let sum = 0;
+      for (let k = 0; k < RAW_BIN; k++) sum += samples[i + k];
+      const v = sum / RAW_BIN - med;
+      out.push(Number.isFinite(v) ? +v.toFixed(1) : null);
+      n++;
+    }
+    blockLens.push(n);
+  });
+  return { data: out, blockLens };
+}
+
+// 1つの空間(複数ブロック)ぶんの計測から ①Raw ②PSD ③BandPower と 測定品質 をまとめて計算
+// blocks: [ {tp9:[],af7:[],af8:[],tp10:[]}, ... ]
+function calculateFullAnalysis(blocks) {
+  if (blocks && !Array.isArray(blocks)) blocks = [blocks];
+  const power = {};
+  for (const band of Object.keys(BANDS)) power[band] = [];
+  const psd = { freqs: null, tp9: [], af7: [], af8: [], tp10: [] };
+  const raw = { fs: SAMPLE_RATE / RAW_BIN, blocks: [], tp9: [], af7: [], af8: [], tp10: [], rejected: {} };
+  const quality = {};
+
+  for (const ch of CHANNEL_ORDER) {
+    const chBlocks = blocks.map(b => b[ch] || []);
+    const res = analyzeChannel(chBlocks);
+    quality[ch] = {
+      total: res.total,
+      kept: res.kept,
+      rate: +res.rate.toFixed(3),
+      status: res.status,
+      why: res.why, total: res.total,
+    };
+
+    // データ不足のチャンネルは0ではなくnullにして、グラフに描かない(0だと「脳波が0」と誤解されるため)
+    const bp = res.spectrum ? bandPowerFromSpectrum(res.spectrum) : null;
+    for (const band of Object.keys(BANDS)) power[band].push(bp ? bp[band] : null);
+
+    const { freqs, powers } = psdForDisplay(res.spectrum);
+    if (!psd.freqs) psd.freqs = freqs;
+    psd[ch] = powers;
+
+    const rd = rawForDisplay(chBlocks);
+    raw[ch] = rd.data;
+    raw.blocks = rd.blockLens;
+    raw.rejected[ch] = res.rejected;
+  }
+  return { power, psd, raw, quality };
+}
+
+
+/* ------------------------------- アート(脳波でサヴォア邸を「消化」) -------------------------------
+ * 前頭部(AF7/AF8)の ln(β/α) を2秒窓で計算し、最初の15秒の平均を「その人の基準」とする。
+ * 基準を20、基準の1.5倍を100として 0〜100 に写し、なめらかにして、20枚の画像をクロスフェードする。
+ * 低い=実物 / 高い=消化。 ※μ測定とは別の演出用の値で、診断・評価ではない。 */
+let ART_CALIB_SEC = 15; const ART_N = 20, ART_SCALE = Math.log(1.5);   // β/αが基準の1.5倍で最大
+let artTimer = null, artAuto = null, artLive = false, artSmooth = 0, artBase = [], artBaseVal = null, artStart = 0, artDir = 1;
+function artInit(){
+  const a = document.getElementById('artImgA');
+  if (!a.dataset.ready){
+    a.dataset.ready = 1;
+    for (let i = 0; i < ART_N; i++) { const im = new Image(); im.src = `${String(i).padStart(2,'0')}.jpg`; }
+    artApply(0);
+  }
+}
+function artApply(v){
+  v = Math.max(0, Math.min(100, v));
+  const x = v / 100 * (ART_N - 1), i = Math.min(ART_N - 2, Math.floor(x)), f = x - i;
+  const src = n => `${String(n).padStart(2,'0')}.jpg`;
+  const A = document.getElementById('artImgA'), B = document.getElementById('artImgB');
+  if (A.dataset.n != i) { A.src = src(i); A.dataset.n = i; }
+  if (B.dataset.n != i + 1) { B.src = src(i + 1); B.dataset.n = i + 1; }
+  B.style.opacity = f;
+}
+function artStopLive(){ artLive = false; if (artTimer) { clearInterval(artTimer); artTimer = null; } }
+function artStartLive(){
+  artInit(); artStopLive();
+  artLive = true; artBase = []; artBaseVal = null; artSmooth = 0; artStart = Date.now(); artApply(0);
+  artTimer = setInterval(() => {
+    const x = artFrontalLnBA(), el = (Date.now() - artStart) / 1000;
+    if (x === null) return;
+    if (artBaseVal === null) {
+      artBase.push(x);
+      if (el >= ART_CALIB_SEC && artBase.length >= 5) artBaseVal = artBase.reduce((s, v) => s + v, 0) / artBase.length;
+      return;
+    }
+    const target = Math.max(0, Math.min(100, 20 + 80 * (x - artBaseVal) / ART_SCALE));   // 基準=20(ほぼ実物)、β/αが基準の1.5倍で100
+    artSmooth += (target - artSmooth) * 0.15;
+    artApply(artSmooth);
+  }, 250);
+}
+// 直近2秒の前頭部 ln(β/α)。乱れている(瞬き・接触不良)ときは null
+function artFrontalLnBA(){
+  if (!muse || !muse.live) return null;
+  const N = 512, vals = [];
+  for (const ch of ['af7', 'af8']) {
+    const buf = muse.live[ch]; if (!buf || buf.length < N) return null;
+    const seg = detrendLinear(buf.slice(-N));
+    let mn = Infinity, mx = -Infinity; for (const v of seg) { if (v < mn) mn = v; if (v > mx) mx = v; }
+    if (mx - mn > PTP_LIMIT_UV || mx - mn < FLAT_LIMIT_UV) return null;
+    const win = hanningWindow(N), re = new Float64Array(N), im = new Float64Array(N);
+    for (let i = 0; i < N; i++) re[i] = seg[i] * win[i];
+    fft(re, im);
+    let a = 0, b = 0;
+    for (let k = 1; k < N / 2; k++) { const f = k * SAMPLE_RATE / N, p = re[k] * re[k] + im[k] * im[k]; if (f >= 8 && f < 13) a += p; else if (f >= 13 && f < 30) b += p; }
+    if (a <= 0 || b <= 0) return null;
+    vals.push(Math.log(b / a));
+  }
+  return (vals[0] + vals[1]) / 2;
+}
+
+/* ------------------------------- 画面制御 ------------------------------- */
+
+let session = null;        // 今回の測定の設定(タイトル・A/Bの名前と説明・秒数・回数)
+let muse = null;
+let chartInstances = [];
+let measureToken = 0;      // 中止ボタン用。値が変わると進行中の待機・カウントダウンが中断される
+let measureWaiter = null;  // 「測定開始」ボタン待ちの resolve/reject
+let countdownTimer = null;
+
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+}
+
+async function connectDevice(){
+  const statusEl = document.getElementById('connectStatus');
+  const btnEl = document.getElementById('connectBtn');
+  if (!navigator.bluetooth) {
+    statusEl.textContent = t('connectNoBt');
+    return;
+  }
+  if (muse && muse.gatt && muse.gatt.connected) {
+    statusEl.textContent = t('connectAlready');
+    return;
+  }
+  try {
+    statusEl.textContent = t('connectSearching');
+    muse = new MuseClient();
+    await muse.connect();
+    await muse.startStreaming();
+    btnEl.textContent = t('connectBtnDone');
+    statusEl.textContent = t('connectSuccess');
+  } catch (e) {
+    statusEl.textContent = t('connectFail') + (e.message || e);
+    muse = null;
+  }
+}
+
+function goToMenu(){
+  if (!navigator.bluetooth) {
+    document.getElementById('homeError').textContent = t('homeNoBt');
+    return;
+  }
+  showScreen('menu');
+}
+
+function goToRegister(){ showScreen('register'); }
+
+/* ---------- 静的サイト版: 結果はこの端末のブラウザ(IndexedDB)に保存する ---------- */
+const RESULT_DB = 'abResults';
+function idbOpen(){
+  return new Promise((resolve, reject) => {
+    const rq = indexedDB.open(RESULT_DB, 1);
+    rq.onupgradeneeded = () => rq.result.createObjectStore('r', { keyPath: 'id' });
+    rq.onsuccess = () => resolve(rq.result);
+    rq.onerror = () => reject(rq.error);
+  });
+}
+async function idbAll(){
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const rq = db.transaction('r').objectStore('r').getAll();
+    rq.onsuccess = () => resolve(rq.result.sort((p, q) => String(q.timestamp).localeCompare(String(p.timestamp))));
+    rq.onerror = () => reject(rq.error);
+  });
+}
+async function idbPut(obj){
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('r', 'readwrite');
+    tx.objectStore('r').put(obj);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function goToResults(){
+  showScreen('results');
+  const list = document.getElementById('resultsList');
+  list.innerHTML = `<p class="empty-note">${t('resultsLoading')}</p>`;
+  try {
+    const data = await idbAll();
+    if (!data.length){
+      list.innerHTML = `<p class="empty-note">${t('resultsEmpty')}</p>`;
+      return;
+    }
+    list.innerHTML = '';
+    data.forEach(r => {
+      const card = document.createElement('div');
+      card.className = 'result-card';
+      card.onclick = () => showDetail(r);
+      const title = r.title ? `<div class="labels" style="font-size:15px;">${escapeHtml(r.title)}</div>` : '';
+      const descs = [r.a.description, r.b.description].some(Boolean)
+        ? `<div class="result-desc">${escapeHtml(r.a.label)}: ${escapeHtml(r.a.description || '-')}<br>${escapeHtml(r.b.label)}: ${escapeHtml(r.b.description || '-')}</div>` : '';
+      card.innerHTML = `
+        <div class="result-meta">
+          ${title}
+          <div class="ts">${escapeHtml(r.timestamp)}</div>
+          <div class="labels">${escapeHtml(r.a.label)} / ${escapeHtml(r.b.label)}</div>
+          ${descs}
+        </div>`;
+      list.appendChild(card);
+    });
+  } catch (e) {
+    list.innerHTML = `<p class="error-note">${t('resultsFetchError')}</p>`;
+  }
+}
+
+function destroyCharts(){
+  chartInstances.forEach(c => { try { c.destroy(); } catch(e){} });
+  chartInstances = [];
+}
+
+// 周波数帯(Hz)。PSDグラフに帯を重ねて表示する
+const PSD_BANDS = [
+  { name: 'Delta', sym: 'δ', lo: 0.5, hi: 4, fill: 'rgba(120,150,220,0.10)' },
+  { name: 'Theta', sym: 'θ', lo: 4, hi: 8, fill: 'rgba(120,200,190,0.12)' },
+  { name: 'Alpha', sym: 'α', lo: 8, hi: 13, fill: 'rgba(230,170,90,0.12)' },
+  { name: 'Beta', sym: 'β', lo: 13, hi: 30, fill: 'rgba(200,110,190,0.10)' },
+  { name: 'Gamma', sym: 'γ', lo: 30, hi: 50, fill: 'rgba(120,120,120,0.08)' },
+];
+function psdBandPlugin(labels){
+  const idx = (hz) => { let best = 0, bd = Infinity; labels.forEach((l, i) => { const d = Math.abs(+l - hz); if (d < bd) { bd = d; best = i; } }); return best; };
+  return {
+    id: 'psdBands',
+    beforeDatasetsDraw(chart) {
+      const { ctx, chartArea: ca, scales: { x } } = chart; if (!ca || !x) return;
+      ctx.save();
+      PSD_BANDS.forEach(bd => {
+        const x0 = Math.max(ca.left, x.getPixelForValue(idx(bd.lo))), x1 = Math.min(ca.right, bd.hi >= 50 ? ca.right : x.getPixelForValue(idx(bd.hi)));
+        ctx.fillStyle = bd.fill; ctx.fillRect(x0, ca.top, x1 - x0, ca.bottom - ca.top);
+        ctx.strokeStyle = 'rgba(100,90,120,0.35)'; ctx.setLineDash([3, 3]); ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x0, ca.top); ctx.lineTo(x0, ca.bottom); ctx.stroke();
+      });
+      ctx.restore();
+    },
+    afterDatasetsDraw(chart) {
+      const { ctx, chartArea: ca, scales: { x } } = chart; if (!ca || !x) return;
+      ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillStyle = '#5b5568';
+      PSD_BANDS.forEach(bd => {
+        const x0 = Math.max(ca.left, x.getPixelForValue(idx(bd.lo))), x1 = Math.min(ca.right, bd.hi >= 50 ? ca.right : x.getPixelForValue(idx(bd.hi)));
+        const w = x1 - x0, cx = (x0 + x1) / 2;
+        const range = bd.hi >= 50 ? '30–50' : `${bd.lo}–${bd.hi}`;
+        ctx.font = '10px sans-serif';
+        if (ctx.measureText(`${bd.name} ${range}`).width + 6 <= w) { ctx.fillText(bd.name, cx, ca.top + 3); ctx.fillText(range + ' Hz', cx, ca.top + 15); }
+        else if (ctx.measureText(`${range}`).width + 4 <= w) { ctx.fillText(bd.sym, cx, ca.top + 3); ctx.fillText(range, cx, ca.top + 15); }
+        else { ctx.fillText(bd.sym, cx, ca.top + 3); }
+      });
+      ctx.restore();
+    },
+  };
+}
+
+function buildLineChart(canvasId, labels, series, yTitle, opts){
+  opts = opts || {};
+  const ctx = document.getElementById(canvasId);
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: series.map(s => ({
+        label: s.label,
+        data: s.data,
+        borderColor: s.color,
+        backgroundColor: s.color,
+        pointRadius: 0,
+        borderWidth: 1.5,
+        tension: 0.15,
+      }))
+    },
+    plugins: opts.bands ? [psdBandPlugin(labels)] : [],
+    options: {
+      responsive: true,
+      animation: false,
+      plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } } },
+      scales: {
+        x: opts.bands
+          ? { title: { display: true, text: t('psdXTitle'), font: { size: 11 } }, grid: { color: (c) => (+labels[c.index] % 5 === 0 ? 'rgba(100,90,120,0.18)' : 'transparent'), tickColor: (c) => (+labels[c.index] % 5 === 0 ? 'rgba(100,90,120,0.4)' : 'transparent') }, ticks: { autoSkip: false, maxRotation: 0, font: { size: 10 }, callback: (v, i) => { const f = +labels[i]; return (f % 5 === 0) ? f : ''; } } }
+          : { ticks: { maxTicksLimit: 6, font: { size: 10 } } },
+        y: { min: opts.bands ? 0 : undefined, grace: opts.bands ? '35%' : 0, title: { display: true, text: yTitle, font: { size: 10 } }, ticks: { font: { size: 10 } } }
+      }
+    }
+  });
+  chartInstances.push(chart);
+  return chart;
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// 測定品質(ノイズ除去後に使えたデータの割合)を、空間A/B × チャンネルの表で表示する
+function renderQuality(r){
+  const block = document.getElementById('qualityBlock');
+  const qa = r.a && r.a.quality;
+  const qb = r.b && r.b.quality;
+  if (!qa || !qb) { block.style.display = 'none'; return; } // 旧バージョンで保存された結果には品質情報がない
+  block.style.display = 'block';
+
+  const statusKey = { good: 'qualityGood', fair: 'qualityFair', poor: 'qualityPoor' };
+  const cell = (q) => {
+    if (!q) return '<td>-</td>';
+    const insufficient = q.kept < MIN_CLEAN_EPOCHS;
+    const pct = Math.round(Number(q.rate) * 100) + '%';
+    const status = statusKey[q.status] ? q.status : 'poor';
+    const label = insufficient ? t('qualityInsufficient') : t(statusKey[status]);
+    return `<td class="q-${status}"><span class="q-pct">${pct}</span><span class="q-st">${label}</span></td>`;
+  };
+  const head = CHANNEL_ORDER.map(ch => `<th>${CHANNEL_LABELS[ch]}</th>`).join('');
+  const row = (label, q) => `<tr><th class="q-room">${escapeHtml(label)}</th>${CHANNEL_ORDER.map(ch => cell(q[ch])).join('')}</tr>`;
+  document.getElementById('qualityTable').innerHTML =
+    `<table class="quality-table"><thead><tr><th></th>${head}</tr></thead><tbody>${row(r.a.label, qa)}${row(r.b.label, qb)}</tbody></table>`;
+
+  const anyPoor = CHANNEL_ORDER.some(ch => (qa[ch] && qa[ch].status === 'poor') || (qb[ch] && qb[ch].status === 'poor'));
+  let warn = anyPoor ? t('qualityLowWarning') : '';
+  if (anyPoor) {
+    const lines = [];
+    [[r.a.label, qa], [r.b.label, qb]].forEach(([lab, q]) => CHANNEL_ORDER.forEach(ch => {
+      const c = q[ch];
+      if (c && c.status === 'poor' && c.why && c.total) lines.push(`${lab} ${CHANNEL_LABELS[ch]}: ${t('qualityWhyFn')(c.why, c.total)}`);
+    }));
+    if (lines.length) warn += '\n' + lines.join('\n');
+  }
+  const warnEl = document.getElementById('qualityWarn');
+  warnEl.style.whiteSpace = 'pre-line';
+  warnEl.textContent = warn;
+}
+
+// 空間の名前・説明・測定設定を表示する(画像は扱わない)
+function renderSettings(r){
+  const card = (x) => `<div class="space-card"><div class="space-name">${escapeHtml(x.label)}</div>` +
+    (x.description ? `<div class="space-desc">${escapeHtml(x.description)}</div>` : '') + `</div>`;
+  document.getElementById('detailImages').innerHTML = card(r.a) + card(r.b);
+  const st = r.settings;
+  document.getElementById('detailSettings').textContent = st ? t('settingsSummary')(st) : '';
+}
+
+/* ---------- ① Raw EEG(SVG) : 捨てた区間を赤く色付け ---------- */
+
+const RAW_LANE_H = 58;       // 1チャンネル分の高さ(px)
+const RAW_CLIP_UV = 150;     // 表示上の振れ幅(±µV)。これを超える部分は端で切る
+const RAW_W = 600, RAW_LEFT = 38, RAW_RIGHT = 8, RAW_TOP = 6, RAW_AXIS_H = 20;
+
+function drawRawLanes(containerId, space){
+  const el = document.getElementById(containerId);
+  const raw = space.raw;
+  if (!raw) { el.innerHTML = ''; return false; }
+  // 旧形式(30秒/300点)の結果にも対応
+  const first = raw.tp9 || [];
+  const fs = raw.fs || (first.length / 30) || 1;
+  const blockLens = (raw.blocks && raw.blocks.length) ? raw.blocks : [first.length];
+  const totalSec = first.length / fs;
+  if (!first.length) { el.innerHTML = ''; return false; }
+  const plotW = RAW_W - RAW_LEFT - RAW_RIGHT;
+  const X = (sec) => RAW_LEFT + (sec / totalSec) * plotW;
+  const H = RAW_TOP + CHANNEL_ORDER.length * RAW_LANE_H + RAW_AXIS_H;
+  let svg = `<svg class="raw-svg" viewBox="0 0 ${RAW_W} ${H}" role="img" aria-label="Raw EEG">`;
+  svg += `<defs>${CHANNEL_ORDER.map((ch, i) => `<clipPath id="${containerId}-clip${i}"><rect x="${RAW_LEFT}" y="${RAW_TOP + i * RAW_LANE_H}" width="${plotW}" height="${RAW_LANE_H}"/></clipPath>`).join('')}</defs>`;
+
+  CHANNEL_ORDER.forEach((ch, i) => {
+    const top = RAW_TOP + i * RAW_LANE_H;
+    const mid = top + RAW_LANE_H / 2;
+    const data = raw[ch] || [];
+    const q = space.quality && space.quality[ch];
+    const insufficient = q && q.kept < MIN_CLEAN_EPOCHS;
+    // レーンの背景とチャンネル名
+    svg += `<rect x="${RAW_LEFT}" y="${top}" width="${plotW}" height="${RAW_LANE_H}" fill="${i % 2 ? 'rgba(0,0,0,0.025)' : 'rgba(0,0,0,0.0)'}"/>`;
+    svg += `<text x="${RAW_LEFT - 6}" y="${mid + 3}" text-anchor="end">${CHANNEL_LABELS[ch]}</text>`;
+    // 捨てた区間(赤)
+    const rej = (raw.rejected && raw.rejected[ch]) || [];
+    rej.forEach(([s0, s1]) => {
+      const x0 = X(Math.min(s0, totalSec)), x1 = X(Math.min(s1, totalSec));
+      if (x1 - x0 <= 0) return;
+      svg += `<rect x="${x0.toFixed(2)}" y="${top}" width="${Math.max(x1 - x0, 0.8).toFixed(2)}" height="${RAW_LANE_H}" fill="rgba(214,60,60,0.28)"/>`;
+    });
+    // 波形(ブロックの切れ目では線をつながない)
+    const scale = (RAW_LANE_H / 2) / RAW_CLIP_UV;
+    let d = '', idx = 0;
+    blockLens.forEach(n => {
+      let pen = false;
+      for (let k = 0; k < n; k++, idx++) {
+        const v = data[idx];
+        if (v === null || v === undefined || !Number.isFinite(v)) { pen = false; continue; }
+        const x = X(idx / fs), y = mid - Math.max(-RAW_CLIP_UV * 1.6, Math.min(RAW_CLIP_UV * 1.6, v)) * scale;
+        d += (pen ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1);
+        pen = true;
+      }
+    });
+    svg += `<g clip-path="url(#${containerId}-clip${i})"><path d="${d}" fill="none" stroke="${CHANNEL_COLORS[ch]}" stroke-width="0.9" stroke-linejoin="round"/></g>`;
+    if (insufficient) svg += `<text x="${RAW_LEFT + 6}" y="${top + 12}" style="fill:#b03a3a">${escapeHtml(t('qualityInsufficient'))}</text>`;
+    // レーン間の罫線
+    svg += `<line x1="${RAW_LEFT}" x2="${RAW_W - RAW_RIGHT}" y1="${top + RAW_LANE_H}" y2="${top + RAW_LANE_H}" stroke="rgba(0,0,0,0.12)" stroke-width="0.5"/>`;
+  });
+
+  // ブロックの切れ目(複数回測定したとき)
+  if (blockLens.length > 1) {
+    let acc = 0;
+    blockLens.forEach((n, bi) => {
+      if (bi > 0) {
+        const x = X(acc / fs);
+        svg += `<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${RAW_TOP}" y2="${RAW_TOP + CHANNEL_ORDER.length * RAW_LANE_H}" stroke="rgba(0,0,0,0.45)" stroke-width="0.8" stroke-dasharray="3 3"/>`;
+      }
+      const xm = X((acc + n / 2) / fs);
+      svg += `<text x="${xm.toFixed(1)}" y="${RAW_TOP + CHANNEL_ORDER.length * RAW_LANE_H + 14}" text-anchor="middle">#${bi + 1}</text>`;
+      acc += n;
+    });
+  } else {
+    // 時間軸の目盛り
+    const stepSec = totalSec > 60 ? 20 : 10;
+    for (let sec = 0; sec <= totalSec + 0.01; sec += stepSec) {
+      const x = X(sec);
+      svg += `<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${RAW_TOP + CHANNEL_ORDER.length * RAW_LANE_H}" y2="${RAW_TOP + CHANNEL_ORDER.length * RAW_LANE_H + 4}" stroke="rgba(0,0,0,0.4)" stroke-width="0.6"/>`;
+      svg += `<text x="${x.toFixed(1)}" y="${RAW_TOP + CHANNEL_ORDER.length * RAW_LANE_H + 14}" text-anchor="middle">${sec}s</text>`;
+    }
+  }
+  svg += '</svg>';
+  el.innerHTML = svg;
+  return true;
+}
+
+/* ---------- ④ 脳マップ ---------- */
+
+// 領域の位置は「頭を真上から見た図(上=前)」。Muse 2 で測れるのは前頭部(AF7/AF8)と側頭部(TP9/TP10)のみ。
+const BRAIN_REGIONS = [
+  { id: 'frontalL',  ch: 'af7',  rect: [0, 0, 150, 125],     lbl: [100, 98] },
+  { id: 'frontalR',  ch: 'af8',  rect: [150, 0, 300, 125],   lbl: [200, 98] },
+  { id: 'temporalL', ch: 'tp9',  rect: [0, 125, 78, 268],    lbl: [39, 236] },
+  { id: 'temporalR', ch: 'tp10', rect: [222, 125, 300, 268], lbl: [261, 236] },
+  { id: 'central',   ch: null,   rect: [78, 125, 222, 205],  lbl: [150, 168] },
+  { id: 'parietal',  ch: null,   rect: [78, 205, 222, 268],  lbl: [150, 240] },
+  { id: 'occipital', ch: null,   rect: [0, 268, 300, 340],   lbl: [150, 305] },
+];
+const ELECTRODE_POS = { af7: [92, 62], af8: [208, 62], tp9: [38, 200], tp10: [262, 200] };
+const BRAIN_BAND_ORDER = ['Alpha', 'Theta', 'Beta', 'Delta', 'Gamma'];
+const BRAIN_DIFF_NOTICE_LN = Math.log(1.2);  // ±20%未満は「目立った差なし」とする目安
+const BRAIN_SAT_LN = Math.log(2);            // 2倍以上で色の濃さが最大
+let brainBand = 'Alpha';
+
+function brainDiffs(r, band){
+  // ln(B/A) をチャンネルごとに。どちらかが欠損/0以下なら null
+  return CHANNEL_ORDER.map((ch, i) => {
+    const pa = r.a.power && r.a.power[band] ? r.a.power[band][i] : null;
+    const pb = r.b.power && r.b.power[band] ? r.b.power[band][i] : null;
+    if (!(pa > 0) || !(pb > 0)) return null;
+    return Math.log(pb / pa);
+  });
+}
+
+function brainFill(d){
+  if (d === null) return 'rgba(160,160,170,0.18)';
+  const k = Math.max(-1, Math.min(1, d / BRAIN_SAT_LN));
+  const a = (0.10 + 0.72 * Math.abs(k)).toFixed(3);
+  return k >= 0 ? `rgba(214,38,201,${a})` : `rgba(32,201,214,${a})`;
+}
+
+function renderBrainMap(r){
+  const block = document.getElementById('brainBlock');
+  if (!r.a.power || !r.b.power) { block.style.display = 'none'; return; }
+  block.style.display = 'block';
+  if (!BRAIN_BAND_ORDER.includes(brainBand)) brainBand = 'Alpha';
+
+  // タブ
+  const tabs = document.getElementById('brainTabs');
+  tabs.innerHTML = BRAIN_BAND_ORDER.map(b =>
+    `<button type="button" class="brain-tab${b === brainBand ? ' active' : ''}" data-band="${b}">${b}</button>`).join('');
+  tabs.querySelectorAll('.brain-tab').forEach(btn => btn.onclick = () => { brainBand = btn.dataset.band; renderBrainMap(r); });
+
+  const diffs = brainDiffs(r, brainBand);
+  const dOf = (ch) => ch ? diffs[CHANNEL_ORDER.indexOf(ch)] : undefined;
+  const names = t('brainRegion');
+
+  // 図(真上から見た頭)
+  let svg = `<svg class="brain-svg" viewBox="-10 -24 320 372" role="img" aria-label="${escapeHtml(t('brainAria'))}">`;
+  svg += `<defs><clipPath id="headClip"><ellipse cx="150" cy="172" rx="132" ry="156"/></clipPath>
+    <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="rgba(120,120,130,0.35)" stroke-width="1.2"/></pattern></defs>`;
+  svg += `<g clip-path="url(#headClip)">`;
+  BRAIN_REGIONS.forEach(rg => {
+    const [x0, y0, x1, y1] = rg.rect;
+    const measured = !!rg.ch;
+    const d = dOf(rg.ch);
+    svg += `<rect x="${x0}" y="${y0 + 16}" width="${x1 - x0}" height="${y1 - y0}" fill="${measured ? brainFill(d) : 'rgba(255,255,255,0.35)'}" stroke="rgba(60,60,70,0.35)" stroke-width="0.8"/>`;
+    if (!measured) svg += `<rect x="${x0}" y="${y0 + 16}" width="${x1 - x0}" height="${y1 - y0}" fill="url(#hatch)"/>`;
+  });
+  svg += `</g>`;
+  svg += `<ellipse cx="150" cy="172" rx="132" ry="156" fill="none" stroke="#3a3a3a" stroke-width="1.6"/>`;
+  svg += `<path d="M132 17 L150 -8 L168 17" fill="none" stroke="#3a3a3a" stroke-width="1.6" stroke-linejoin="round"/>`;   // 鼻(前)
+  svg += `<path d="M18 160 q-12 14 0 34" fill="none" stroke="#3a3a3a" stroke-width="1.4"/><path d="M282 160 q12 14 0 34" fill="none" stroke="#3a3a3a" stroke-width="1.4"/>`; // 耳
+  svg += `<text x="150" y="-14" text-anchor="middle" style="font-size:10px;fill:#7a7486">${escapeHtml(t('brainFront'))}</text>`;
+  // 領域名
+  BRAIN_REGIONS.forEach(rg => {
+    const [lx, ly] = rg.lbl;
+    svg += `<text x="${lx}" y="${ly + 16}" text-anchor="middle" style="font-size:11px">${escapeHtml(names[rg.id].short)}</text>`;
+  });
+  // 電極(測れる4点)
+  CHANNEL_ORDER.forEach(ch => {
+    const [ex, ey] = ELECTRODE_POS[ch];
+    svg += `<circle cx="${ex}" cy="${ey + 16}" r="10" fill="#fff" stroke="#2a2530" stroke-width="1.4"/><text x="${ex}" y="${ey + 19}" text-anchor="middle" style="font-size:7px;font-weight:600">${CHANNEL_LABELS[ch]}</text>`;
+  });
+  svg += `</svg>`;
+  document.getElementById('brainSvgWrap').innerHTML = svg;
+
+  // 凡例
+  document.getElementById('brainLegend').innerHTML =
+    `<span>${escapeHtml(r.a.label)} ↑</span><span class="grad"></span><span>${escapeHtml(r.b.label)} ↑</span>`;
+
+  // 今回の結果の要約
+  const valid = CHANNEL_ORDER.map((ch, i) => ({ ch, d: diffs[i] })).filter(x => x.d !== null);
+  const sumEl = document.getElementById('brainSummary');
+  if (!valid.length) {
+    sumEl.textContent = t('brainNoData');
+  } else {
+    valid.sort((p, q) => Math.abs(q.d) - Math.abs(p.d));
+    const top = valid[0];
+    if (Math.abs(top.d) < BRAIN_DIFF_NOTICE_LN) {
+      sumEl.innerHTML = escapeHtml(t('brainNoDiff')(brainBand));
+    } else {
+      const regionId = BRAIN_REGIONS.find(rg => rg.ch === top.ch).id;
+      sumEl.innerHTML = escapeHtml(t('brainTop')(brainBand, names[regionId].full, CHANNEL_LABELS[top.ch], r.a.label, r.b.label, top.d));
+    }
+    if (valid.length < CHANNEL_ORDER.length) sumEl.innerHTML += `<span class="sub-note">${escapeHtml(t('brainMissing'))}</span>`;
+    if (brainBand === 'Delta' || brainBand === 'Gamma') sumEl.innerHTML += `<span class="sub-note">${escapeHtml(t('brainBandCaution')(brainBand))}</span>`;
+  }
+
+  // 役割一覧(測れる/測れない)
+  document.getElementById('brainRoles').innerHTML = ['frontal', 'temporal', 'central', 'parietal', 'occipital'].map(key => {
+    const n = names[key];
+    const measured = key === 'frontal' || key === 'temporal';
+    const colorDot = measured ? '' : ' unmeasured';
+    return `<div class="role-item"><span class="dot${colorDot}" style="${measured ? 'background:rgba(120,120,130,0.3)' : ''}"></span><div>
+      <div class="rname">${escapeHtml(n.full)}<span class="badge${measured ? '' : ' off'}">${escapeHtml(measured ? t('brainMeasured') : t('brainUnmeasured'))}</span></div>
+      <div class="rrole">${escapeHtml(n.role)}</div>
+      <div class="rsite">${escapeHtml(n.site)}</div></div></div>`;
+  }).join('');
+}
+
+
+/* ---------- 結論カード(前頭部の覚醒の指標 + 任意の主観回答) ---------- */
+
+function pctJa(r){ const p = Math.round(Math.abs(r - 1) * 100); return p < 1 ? 'ほぼ同じ' : `約${p}%${r > 1 ? '高く' : '低く'}`; }
+function pctEn(r){ const p = Math.round(Math.abs(r - 1) * 100); return p < 1 ? 'about the same' : `about ${p}% ${r > 1 ? 'higher' : 'lower'}`; }
+const CONCL_DIFF_NOTICE = Math.log(1.2);
+
+/* ---- 空間の目的(文面は目的ごとにあらかじめ固定。数値と空間名だけが入れ替わる) ---- */
+const PURPOSES = {
+  wait: { group: 'quiet', dir: 'low', extra: [],
+    ja: { name: '待つ・休む', feel: '落ち着いて待てそう', point: '脳の活発さが低い方を、目的に近いと考えます(αが高い・βが低い)。',
+      q: ['その静けさは、待つ時間を穏やかにするものでしょうか。何もなくて退屈な側ではないでしょうか?この観点から再度、空間を見直してみましょう!', '待つ時間が長くなったときも、同じ状態が続くでしょうか?'] },
+    en: { name: 'Waiting / resting', feel: 'calm to wait in', point: 'The space with lower brain activity (higher alpha, lower beta) is considered closer to the purpose.',
+      q: ['Does that quietness make waiting gentle, rather than merely boring? Look at the space again from this viewpoint!', 'Does the same state continue when the wait gets long?'] } },
+  sleep: { group: 'quiet', dir: 'low', extra: ['Theta', 'Delta'],
+    ja: { name: '眠る', feel: '眠くなりそう', point: '脳の活発さが低く、θ(シータ)・δ(デルタ)が高い方を、目的に近いと考えます。δは額で瞬きの影響が残りやすいので、補助として見ます。',
+      q: ['その静けさは、眠りに向かう状態でしょうか。単に疲れの影響ではないでしょうか?この観点から再度、空間を見直してみましょう!'] },
+    en: { name: 'Sleeping', feel: 'sleep-inducing', point: 'The space with lower brain activity and higher theta and delta is considered closer to the purpose. Delta on the forehead is easily contaminated by blinks, so treat it as supporting.',
+      q: ['Is that quietness heading toward sleep, or is it just fatigue? Look at the space again from this viewpoint!'] } },
+  read: { group: 'quiet', dir: 'low', extra: [],
+    ja: { name: '読む・落ち着く', feel: '落ち着いて読めそう', point: '脳の活発さが低い方を、目的に近いと考えます(αが高い・βが低い)。',
+      q: ['その静けさは、読むことや内側へ向かうことに合っているでしょうか。ぼんやりしてしまう側ではないでしょうか?この観点から再度、空間を見直してみましょう!', 'この空間に、視線の落ち着き先や静けさがあるでしょうか?'] },
+    en: { name: 'Reading / settling', feel: 'calm to read in', point: 'The space with lower brain activity (higher alpha, lower beta) is considered closer to the purpose.',
+      q: ['Does that quietness suit reading or turning inward, rather than just spacing out? Look at the space again from this viewpoint!', 'Does the space offer a place for the eye to rest, and quietness?'] } },
+  play: { group: 'active', dir: 'high', extra: [],
+    ja: { name: '学ぶ・遊ぶ', feel: '学んだり遊んだりしたくなる', point: '脳の活発さが高い方を、目的に近いと考えます(βが高い・αが低い)。',
+      q: ['その活発さは、楽しさや好奇心に近いでしょうか。緊張や警戒ではないでしょうか?この観点から再度、空間を見直してみましょう!', '初めて見たから反応しただけではないでしょうか?(慣れたあとも続くか)'] },
+    en: { name: 'Learning / playing', feel: 'inviting to learn or play in', point: 'The space with higher brain activity (higher beta, lower alpha) is considered closer to the purpose.',
+      q: ['Is that activity closer to enjoyment and curiosity than to tension or alertness? Look at the space again from this viewpoint!', 'Did they react only because it was new? (Does it persist once they are used to it?)'] } },
+  work: { group: 'active', dir: 'high', extra: [],
+    ja: { name: '働く・集中', feel: '集中できそう', point: '脳の活発さが高い方を、目的に近いと考えます(βが高い・αが低い)。',
+      q: ['その活発さは、作業や学習に向くものでしょうか。刺激が強すぎて気が散る側ではないでしょうか?この観点から再度、空間を見直してみましょう!', '長く過ごしたときも、同じ状態が続くでしょうか?'] },
+    en: { name: 'Working / concentrating', feel: 'good for concentrating', point: 'The space with higher brain activity (higher beta, lower alpha) is considered closer to the purpose.',
+      q: ['Is that activity suited to work or study, rather than so stimulating that it distracts? Look at the space again from this viewpoint!', 'Does the same state continue when people stay for a long time?'] } },
+  bustle: { group: 'active', dir: 'high', extra: [],
+    ja: { name: 'にぎわう・回遊', feel: '歩き回りたくなる', point: '脳の活発さが高い方を、目的に近いと考えます(βが高い・αが低い)。',
+      q: ['その活発さは、人が集まって動き出す質のものでしょうか?この観点から再度、空間を見直してみましょう!', '活発になる代わりに、疲れやすさや落ち着かなさが出ていませんか?'] },
+    en: { name: 'Bustling / strolling', feel: 'inviting to stroll around', point: 'The space with higher brain activity (higher beta, lower alpha) is considered closer to the purpose.',
+      q: ['Is that activity the kind that gets people gathering and moving? Look at the space again from this viewpoint!', 'Is the space becoming tiring or restless in exchange for the liveliness?'] } },
+  move: { group: 'active', dir: 'high', extra: [],
+    ja: { name: '動く・競う', feel: '体を動かしたくなる', point: '脳の活発さが高い方を、目的に近いと考えます(βが高い・αが低い)。',
+      q: ['その活発さは、動きたくなる高まりでしょうか。不安や気後れではないでしょうか?この観点から再度、空間を見直してみましょう!', '体を動かし始めたあとも、同じ状態が続くでしょうか?'] },
+    en: { name: 'Moving / competing', feel: 'inviting to move the body', point: 'The space with higher brain activity (higher beta, lower alpha) is considered closer to the purpose.',
+      q: ['Is that activity a rising urge to move, rather than anxiety or hesitation? Look at the space again from this viewpoint!', 'Does the same state continue once people start moving?'] } },
+  stay: { group: 'neutral', dir: 'none', extra: [],
+    ja: { name: '滞在・出会い', feel: '居心地がよさそう', point: '活発・静かのどちらが良いとは決めません。差があったことだけをお伝えします。',
+      multi: '居心地の良し悪しは、多点EEG(14ch以上)の前頭部の左右差などで調べられます(研究段階で、個人差が大きい)。',
+      q: ['「居心地がよさそう」と感じた理由は、空間のどの要素にあるでしょうか。', '長く居たときも、同じ居心地が続くでしょうか?'] },
+    en: { name: 'Staying / meeting', feel: 'comfortable to stay in', point: 'No direction (active or quiet) is judged better. Only the fact of a difference is reported.',
+      multi: 'Whether it feels comfortable can be examined with multi-channel EEG (14+ ch), e.g. left-right differences in the frontal area (research stage, large individual differences).',
+      q: ['Which element of the space is the reason it felt comfortable?', 'Does the same comfort continue when people stay for a long time?'] } },
+  view: { group: 'neutral', dir: 'none', extra: [],
+    ja: { name: '観る・体験する', feel: '引き込まれそう', point: '活発・静かのどちらが良いとは決めません。差があったことだけをお伝えします。',
+      multi: '注意が向いた場所は、多点EEG(14ch以上)の後頭部・頭頂部のαなどで調べられます(研究段階)。',
+      q: ['「引き込まれそう」と感じた理由は、空間のどの要素にあるでしょうか。', '見ているものが変わっても、同じ状態が続くでしょうか?'] },
+    en: { name: 'Viewing / experiencing', feel: 'engaging', point: 'No direction (active or quiet) is judged better. Only the fact of a difference is reported.',
+      multi: 'Where attention went can be examined with multi-channel EEG (14+ ch), e.g. alpha in the occipital and parietal areas (research stage).',
+      q: ['Which element of the space is the reason it felt engaging?', 'Does the same state continue when what is being looked at changes?'] } },
+};
+const PURPOSE_GROUPS = [
+  { id: 'quiet',   ja: '静かにしたい', en: 'Want it quiet' },
+  { id: 'active',  ja: '活発にしたい', en: 'Want it lively' },
+  { id: 'neutral', ja: 'どちらでもない', en: 'Neither' },
+];
+const PURPOSE_ORDER = ['wait', 'sleep', 'read', 'play', 'work', 'bustle', 'move', 'stay', 'view'];
+// 旧バージョンで保存された目的の読み替え
+const PURPOSE_LEGACY = { excite: 'play', vital: 'bustle', focus: 'work', relax: 'wait', medit: 'read', sleepy: 'sleep' };
+
+// Muse 2 では測れない目的(選択不可)。多点EEG(14ch以上)で測れるものだけを示す
+const GREY_PURPOSES = [
+  { id: 'like',    ja: ['居心地・好き嫌い', '多点EEG(14ch以上)'], en: ['Comfort / liking', 'Multi-channel EEG (14+ ch)'] },
+  { id: 'attend',  ja: ['注意の向き', '多点EEG(14ch以上)'], en: ['Direction of attention', 'Multi-channel EEG (14+ ch)'] },
+  { id: 'load',    ja: ['迷わなさ・頭の負荷の少なさ', '多点EEG(14ch以上)'], en: ['Ease of orientation / low mental load', 'Multi-channel EEG (14+ ch)'] },
+  { id: 'visual',  ja: ['空間認知・視覚の違い', '多点EEG(14ch以上)'], en: ['Spatial perception / vision', 'Multi-channel EEG (14+ ch)'] },
+  { id: 'create',  ja: ['創造・発想', '多点EEG(14ch以上)'], en: ['Creativity / ideation', 'Multi-channel EEG (14+ ch)'] },
+];
+
+function langKey(){ return currentLang === 'en' ? 'en' : 'ja'; }
+function purposeText(id){ const P = PURPOSES[id]; return P ? P[langKey()] : null; }
+
+let selectedPurpose = null;
+let selectedView = 'real';
+function renderViewPicker(){
+  const chips = document.getElementById('viewChips'), note = document.getElementById('viewNote');
+  if (!chips) return;
+  chips.innerHTML = ['real', 'photo'].map(v => `<button type="button" class="purpose-chip${v === selectedView ? ' active' : ''}" data-view="${v}">${escapeHtml(t(v === 'real' ? 'viewReal' : 'viewPhoto'))}</button>`).join('');
+  chips.querySelectorAll('.purpose-chip').forEach(b => b.onclick = () => { selectedView = b.dataset.view; renderViewPicker(); });
+  note.textContent = t(selectedView === 'real' ? 'viewNoteReal' : 'viewNotePhoto');
+}
+document.addEventListener('DOMContentLoaded', renderViewPicker);
+function renderPurposePicker(){
+  const chips = document.getElementById('purposeChips'), grey = document.getElementById('purposeGrey');
+  if (!chips || !grey) return;
+  chips.innerHTML = PURPOSE_GROUPS.map(g => `<div class="purpose-group-title">${escapeHtml(g[langKey()])}</div><div class="purpose-chips" style="margin-top:6px;">${PURPOSE_ORDER.filter(id => PURPOSES[id].group === g.id).map(id => `<button type="button" class="purpose-chip${id === selectedPurpose ? ' active' : ''}" data-purpose="${id}">${escapeHtml(purposeText(id).name)}</button>`).join('')}</div>`).join('');
+  chips.querySelectorAll('.purpose-chip').forEach(b => b.onclick = () => { selectedPurpose = b.dataset.purpose; document.getElementById('registerError').textContent = ''; renderPurposePicker(); });
+  const lk = langKey();
+  grey.innerHTML = GREY_PURPOSES.map(g => `<div class="pg" aria-disabled="true"><b>${escapeHtml(g[lk][0])}</b><span>${escapeHtml(t('purposeNeedLab'))}: ${escapeHtml(g[lk][1])}</span></div>`).join('');
+}
+document.addEventListener('DOMContentLoaded', renderPurposePicker);
+
+// 前頭部(AF7=1, AF8=2)での帯域ごとの ln(B/A) の平均。使えない帯域は null
+function frontalBandLn(r, band){
+  const v = [];
+  [1, 2].forEach(i => {
+    const pa = r.a.power && r.a.power[band] ? r.a.power[band][i] : null;
+    const pb = r.b.power && r.b.power[band] ? r.b.power[band][i] : null;
+    if (pa > 0 && pb > 0) v.push(Math.log(pb / pa));
+  });
+  return v.length ? v.reduce((p, q) => p + q, 0) / v.length : null;
+}
+// 前頭部(AF7・AF8)の β/α。チャンネルごとの β/α の幾何平均(結論の指標 d と同じ尺度)
+function fmtBA(x){ return x >= 1 ? x.toFixed(2) : x >= 0.1 ? x.toFixed(2) : x.toFixed(3); }
+function frontalBA(r, k){
+  const v = [];
+  [1, 2].forEach(i => { const al = r[k].power && r[k].power.Alpha ? r[k].power.Alpha[i] : null, be = r[k].power && r[k].power.Beta ? r[k].power.Beta[i] : null; if (al > 0 && be > 0) v.push(Math.log(be / al)); });
+  return v.length ? Math.exp(v.reduce((p, q) => p + q, 0) / v.length) : null;
+}
+function frontalIndex(r){
+  const al = frontalBandLn(r, 'Alpha'), be = frontalBandLn(r, 'Beta');
+  if (al === null || be === null) return null;
+  return { d: be - al, alpha: al, beta: be, theta: frontalBandLn(r, 'Theta'), delta: frontalBandLn(r, 'Delta') };
+}
+
+function getSubj(r){ return (r.subj === 'a' || r.subj === 'b' || r.subj === 'none') ? r.subj : null; }
+function getView(r){ return r.view_mode === 'photo' ? 'photo' : 'real'; }
+
+function getPurpose(r){
+  const fix = (v) => PURPOSES[v] ? v : (PURPOSE_LEGACY[v] || null);
+  if (r.purpose && fix(r.purpose)) return fix(r.purpose);
+  if (r._purpose) return r._purpose;
+  try { const v = localStorage.getItem('abPurpose:' + (r.id || '') + ':' + (r.timestamp || '')); if (v && fix(v)) return fix(v); } catch(e){}
+  return null;
+}
+function setPurpose(r, v){
+  r._purpose = v;
+  try { localStorage.setItem('abPurpose:' + (r.id || '') + ':' + (r.timestamp || ''), v); } catch(e){}
+}
+
+// 目的ごとの「紛らわしい状態」と、建築家の出番の例(シート第3章)
+const ARCH_EX = {
+  wait:   { ja: ['退屈や眠さ', '変化がなく単調で、待つ時間が長く感じられる部分', '窓の外の木の揺れなど、ゆるやかな変化'],
+            en: ['boredom or sleepiness', 'parts that are monotonous and make waiting feel long', 'gentle change, such as trees swaying outside the window'] },
+  sleep:  { ja: ['単なる疲れ', 'まぶしさや硬い椅子など、疲れだけが残る部分', '一定の明るさと、やわらかい音'],
+            en: ['mere fatigue', 'parts such as glare or hard chairs that leave only fatigue', 'steady brightness and soft sound'] },
+  read:   { ja: ['ぼんやりしてしまう状態', '視線の落ち着き先がなく、ぼんやりしてしまう部分', '視線の落ち着き先がある静けさ'],
+            en: ['spacing out', 'parts with no place for the eye to rest, where one just spaces out', 'a quietness with a place for the eye to rest'] },
+  play:   { ja: ['緊張や警戒', '動線が見えない部分', '奥に何かありそうな期待'],
+            en: ['tension or alertness', 'parts where the circulation cannot be read', 'a sense of anticipation that something lies beyond (while the whole remains understandable)'] },
+  work:   { ja: ['気が散る刺激', '背後を人が通る、音が反響する部分', '人の気配がわずかに見える程度の刺激'],
+            en: ['distracting stimuli', 'parts where people pass behind you or sound echoes', 'a level of stimulus where you only faintly sense other people'] },
+  bustle: { ja: ['疲れや落ち着かなさ', '人が絶えず視界に入り、休まらない部分', '人の動きが見えて、輪に加わりたくなる賑わい'],
+            en: ['fatigue or restlessness', 'parts where people are constantly in view and there is no rest', 'a liveliness where you see people moving and want to join in'] },
+  move:   { ja: ['不安や気後れ', '入口や見学席など、気後れしやすい部分', '動く人が見えて、加わりたくなる場所'],
+            en: ['anxiety or hesitation', 'parts such as entrances or viewing seats where people hesitate', 'a place where you see people moving and want to join'] },
+  stay:   { ja: ['', '', ''], en: ['', '', ''] },
+  view:   { ja: ['', '', ''], en: ['', '', ''] },
+};
+
+// 固定文面(日本語/英語)。引数は空間名と数値だけ。photo=true は「写真・パース」
+const CONCL_TXT = {
+  ja: {
+    measured: (photo) => photo ? '写真を見ている間の、脳の活発さ。光・音・温度・匂い・座り心地は入っていません' : 'その空間にいる間の、脳の活発さ',
+    during: (photo) => photo ? '写真を見ている間' : 'その場にいる間',
+    ph: (lab, photo) => photo ? `${lab} の写真` : `${lab} `,
+    head: (hi, lo, ra, rb, isLow) => isLow ? `脳の活発さは ${lo} の方が低い値でした。` : `脳の活発さは ${hi} の方が高い値でした。`,
+    calc: (hi, lo, bh, bl) => `β/α(前頭部): ${hi} ${fmtBA(bh)}、${lo} ${fmtBA(bl)}`,
+    caveat: { quiet: 'Muse 2 で言えるのは、活発か静かかまでです。くつろぎか退屈かは、多点EEGなら区別できる可能性があります。',
+              active: 'Muse 2 で言えるのは、活発か静かかまでです。楽しさか緊張かは、多点EEGなら区別できる可能性があります。',
+              neutral: 'Muse 2 で言えるのは、活発か静かかまでです。', sleep: '' },
+    grpOf: { quiet: '静かにしたい', active: '活発にしたい' },
+    photoNote: '写真・パースを見ている間の結果です。光・音・湿度・匂い・座り心地等は入っておりません。',
+    deltaNote: '額では瞬きの影響が残りやすいため、補助指標とします。',
+    extraTheta: (aim, other, r) => `θ(シータ): ${aim} は ${other} に比べて${pctJa(r).replace(/く$/, 'い')}`,
+    extraDelta: (aim, other, r) => `δ(デルタ): ${aim} は ${other} に比べて${pctJa(r).replace(/く$/, 'い')}`,
+    sameHead: (name) => `脳の活発さに、目立った差は見られませんでした(±20%未満が目安)。\n『${name}』に対して、2つの空間の差は前頭部に出ていません。`,
+    noFrontal: '前頭部のデータが足りないため、A と B を比べられませんでした。',
+    noFrontalMeaning: '額の電極の採用率が低く、前頭部の差を読めない状態です。データの項の「品質」と、波形の赤い網掛けを確認し、装着し直して測り直してください。',
+    meaning: (aim, name, feel, grp) => `つまり、脳波では ${aim} が目的に近い向きです。`,
+    neutralMeaning: 'この場面は、活発・静かのどちらが良いとは決めません。',
+    neutralSubj: (pick, feel, isHi) => `あなたの回答 ${pick} は、脳の活発さが${isHi ? '高い' : '低い'}方です。`,
+    match: (aim, name, photo, ph) => `つまり、脳波でも回答でも ${ph(aim, photo)}が目的に近い向きです。\n体の反応と実感がそろっています。`,
+    mismatch: (aim, pick, feel, photo, ph, during) => `つまり、脳波では ${ph(aim, photo)}が目的に近い向きです。\nあなたの回答は ${ph(pick, photo)}で、食い違っています。`,
+    mmQ: (aim, pick, feel, conf, high) => [`${pick} を「${feel}」と答えた理由は何でしょうか。`],
+    unaware: (aim, photo, ph, during) => `つまり、脳波では ${ph(aim, photo)}が目的に近い向きです。\nあなたは違いに気づいていません。`,
+    unawareN: (during) => `あなたは違いに気づいていません。`,
+    matchQ: (q) => '設計がうまくいっている可能性が高いです。' + q.replace('?この観点から再度、空間を見直してみましょう!', '。再度、確認しておきましょう。'),
+    unawareQ: ['あなたが気づいていない反応が、脳波にだけ出ています。2つの空間の違いのうち、どの設計要素がこの反応を生んでいるでしょうか。', 'その要素だけを変えた案をつくり、もう一度測ってみましょう。反応が残る要素が、要因の手がかりです。'],
+    sameNone: (name) => `どちらの空間も、目的『${name}』に対する差は前頭部に出ていません。`,
+    sameQ: (name) => [`色以外の変数(光の量、窓の開き方、家具の配置)に、目的『${name}』を左右する鍵はないでしょうか?`, '差が小さいなら、別の基準(コストや施工しやすさなど)で選べないでしょうか?'],
+    sameSubj: (pick, feel, photo, ph, during) => `あなたの回答は ${ph(pick, photo)}ですが、脳の活発さに差はありません。`,
+    sameSubjQ: (pick, feel, name) => [`${pick} を「${feel}」と答えた理由は何でしょうか。形や光などの空間の特徴、期待、思い出や愛着のどれに近いでしょうか。`, `その理由は、目的(${name})とつながっているでしょうか。`],
+    sameNoneSubj: (during) => `あなたの回答も脳波も、差はありません。`,
+    sameNoneSubjQ: ['あなたにとっても脳波にとっても差が小さいなら、この違いは目的に対して大きな意味を持たないかもしれません。形・配置・光など、別の要素を変えた案で比べると、差は出るでしょうか。', 'この違いは、コストや施工しやすさなど、別の基準で決めてよいかもしれません。'],
+    archLab: 'スタディ例',
+    stepLab: (n) => `Step ${n}`,
+    archEx: (conf, feel) => ['形や光などの空間の特徴、素材や寸法、思い出や愛着など、関係しそうな要素を1つ選びます。', 'その要素だけを変えて、もう一度測ってみましょう。'],
+    archPhoto: '写真に写らない音・光・人の気配も、原因の候補です。',
+    archIntent: (pick, feel, name) => `${pick} で「${feel}」と思って取り入れてきた要素の中に、脳波では${name}の向きに出ていないものがあるかもしれません。要素を1つずつ変えた案をつくり、もう一度測ってみましょう。`,
+  },
+  en: {
+    measured: (photo) => photo ? 'Brain activity while looking at the photos. Light, sound, temperature, smell and seating comfort are not included.' : 'Brain activity while you are in the space',
+    during: (photo) => photo ? 'while looking at the photos' : 'while in the space',
+    ph: (lab, photo) => photo ? `the photo of ${lab}` : lab,
+    head: (hi, lo, ra, rb, isLow) => isLow ? `Brain activity was lower in ${lo}.` : `Brain activity was higher in ${hi}.`,
+    calc: (hi, lo, bh, bl) => `Beta/alpha (frontal): ${hi} ${fmtBA(bh)}, ${lo} ${fmtBA(bl)}`,
+    caveat: { quiet: 'Muse 2 can only say active or quiet. Multi-channel EEG may be able to tell ease from boredom.',
+              active: 'Muse 2 can only say active or quiet. Multi-channel EEG may be able to tell enjoyment from tension.',
+              neutral: 'Muse 2 can only say active or quiet.', sleep: '' },
+    grpOf: { quiet: 'a space meant to be quiet', active: 'a space meant to be lively' },
+    photoNote: 'This is the result while viewing photos or renderings. Light, sound, humidity, smell, seating comfort, etc. are not included.',
+    deltaNote: 'Blinks easily affect the forehead, so this is used as a supporting indicator.',
+    extraTheta: (aim, other, r) => `Theta: ${aim} is ${pctEn(r)} than ${other}`,
+    extraDelta: (aim, other, r) => `Delta: ${aim} is ${pctEn(r)} than ${other}`,
+    sameHead: (name) => `No notable difference in brain activity (frontal; guideline: under ±20%).\nFor "${name}", the two spaces do not differ in the frontal area.`,
+    noFrontal: 'Not enough frontal data to compare A and B.',
+    noFrontalMeaning: 'The forehead electrodes had a low acceptance rate, so the frontal difference cannot be read. Check "Quality" in the data section and the red shading in the waveforms, refit the device and measure again.',
+    meaning: (aim, name, feel, grp) => `In short, the EEG points to ${aim} as closer to the purpose.`,
+    neutralMeaning: 'This scene does not judge active or quiet as better.',
+    neutralSubj: (pick, feel, isHi) => `Your answer, ${pick}, had the ${isHi ? 'higher' : 'lower'} brain activity.`,
+    match: (aim, name, photo, ph) => `In short, both the EEG and your answer point to ${ph(aim, photo)} as closer to the purpose.\nBody response and felt impression agree.`,
+    mismatch: (aim, pick, feel, photo, ph, during) => `In short, the EEG points to ${ph(aim, photo)} as closer to the purpose.\nYour answer was ${ph(pick, photo)}, so they disagree.`,
+    mmQ: (aim, pick, feel, conf, high) => [`Why did you answer that ${pick} felt "${feel}"?`],
+    unaware: (aim, photo, ph, during) => `In short, the EEG points to ${ph(aim, photo)} as closer to the purpose.\nYou did not notice a difference.`,
+    unawareN: (during) => `You did not notice a difference.`,
+    matchQ: (q) => 'The design is likely working well. ' + q.replace('Look at the space again from this viewpoint!', 'Please check once more.'),
+    unawareQ: ['A response you have not noticed appears only in the EEG. Which design element of the two spaces produces this response?', 'Make a version that changes only that element and measure again. The element for which the response remains is a clue to the cause.'],
+    sameNone: (name) => `Neither space differs in the frontal area for the purpose "${name}".`,
+    sameQ: (name) => [`Could another variable (light level, window opening, furniture layout) be what decides the purpose "${name}"?`, 'If the difference is small, can you choose by other criteria such as cost or ease of construction?'],
+    sameSubj: (pick, feel, photo, ph, during) => `Your answer was ${ph(pick, photo)}, but brain activity shows no difference.`,
+    sameSubjQ: (pick, feel, name) => [`Why did you answer that ${pick} felt "${feel}"? Is it closer to features of the space such as form or light, to anticipation, or to memories and attachment?`, `Is that reason connected to the purpose (${name})?`],
+    sameNoneSubj: (during) => `Neither your answer nor the EEG shows a difference.`,
+    sameNoneSubjQ: ['If the difference is small for you and for the EEG, it may not matter much for the purpose. If you compare versions that change another element such as form, layout or light, would a difference appear?', 'This difference may be settled by other criteria such as cost or ease of construction.'],
+    archLab: 'Study example',
+    stepLab: (n) => `Step ${n}`,
+    archEx: (conf, feel) => ['Pick one likely factor: features of the space such as form or light, materials or dimensions, memories or attachment.', 'Change only that factor and measure again.'],
+    archPhoto: 'Sounds, light and the presence of people that the photo does not show are also candidate causes.',
+    archIntent: (pick, feel, name) => `Some of the elements you introduced in ${pick} believing it would be "${feel}" may not show up in the EEG in the direction of ${name}. Make versions that change one element at a time and measure again.`,
+  },
+};
+
+function renderConclusion(r){
+  const lk = langKey(), T = CONCL_TXT[lk];
+  const $ = (id) => document.getElementById(id);
+  const pid = getPurpose(r);
+  const subjEl = $('conclSubj');
+  const photo = getView(r) === 'photo';
+  $('conclNote').textContent = ''; $('conclCalc').textContent = ''; $('conclExtraNote').textContent = '';
+  const clear = (...ids) => ids.forEach(id => { $(id).innerHTML = ''; });
+
+  if (!pid) {   // 旧バージョンの結果など、目的が未登録の場合は、ここで選んでもらう
+    $('conclPurpose').textContent = '—';
+    $('conclHead').textContent = t('conclNoPurpose');
+    clear('conclExtra', 'conclBody', 'conclIntro', 'conclMeaning', 'conclQTitle', 'conclQ', 'conclArch'); $('conclPink').style.display = 'none';
+    subjEl.innerHTML = `<div class="subj-btns">${PURPOSE_ORDER.map(id => `<button type="button" class="subj-btn" data-purpose="${id}">${escapeHtml(purposeText(id).name)}</button>`).join('')}</div>`;
+    subjEl.querySelectorAll('.subj-btn').forEach(b => b.onclick = () => { setPurpose(r, b.dataset.purpose); renderConclusion(r); });
+    return;
+  }
+  subjEl.innerHTML = '';
+  $('conclPhotoNote').textContent = photo ? T.photoNote : '';
+
+  const P = PURPOSES[pid], X = P[lk], AX = ARCH_EX[pid][lk];
+  const subj = getSubj(r);                 // 'a' | 'b' | 'none' | null(旧バージョンの結果)
+  const fi = frontalIndex(r);
+  const lbl = (k) => r[k].label;
+  const other = (k) => k === 'a' ? 'b' : 'a';
+  const during = T.during(photo), ph = T.ph;
+  const sec = (r.settings && r.settings.seconds) || 30;
+  $('conclPurpose').textContent = X.name;
+  let head, meaning, qs = [], noteTxt = '', extra = '', bodyHi = null, intro = '', arch = null, archPick = '';
+
+  if (!fi) {
+    head = T.noFrontal; meaning = T.noFrontalMeaning;
+  } else if (Math.abs(fi.d) >= CONCL_DIFF_NOTICE) {
+    const hiKey = fi.d > 0 ? 'b' : 'a', loKey = other(hiKey);
+    const sign = hiKey === 'b' ? 1 : -1;
+    bodyHi = hiKey;
+    const caveat = T.caveat[pid === 'sleep' ? 'sleep' : P.group];
+    head = T.head(lbl(hiKey), lbl(loKey), Math.exp(sign * fi.alpha), Math.exp(sign * fi.beta), P.dir === 'low'); noteTxt = caveat;
+    const baHi = frontalBA(r, hiKey), baLo = frontalBA(r, loKey);
+    if (baHi && baLo) $('conclCalc').textContent = P.dir === 'low' ? T.calc(lbl(loKey), lbl(hiKey), baLo, baHi) : T.calc(lbl(hiKey), lbl(loKey), baHi, baLo);
+    if (P.dir === 'none') {
+      meaning = T.neutralMeaning;
+      if (subj === 'a' || subj === 'b') meaning += '\n' + T.neutralSubj(lbl(subj), X.feel, subj === hiKey);
+      else if (subj === 'none') meaning += '\n' + T.unawareN(during);
+      qs = subj === 'none' ? T.unawareQ : X.q; extra = X.multi || '';
+      $('conclNote').textContent = caveat; $('conclHead').textContent = head; $('conclExtra').textContent = extra; $('conclBody').textContent = bodyLine(r, bodyHi);
+      $('conclIntro').textContent = intro; $('conclMeaning').textContent = meaning;
+      $('conclQTitle').textContent = qs.length ? t('conclQTitle') : '';
+      $('conclPink').style.display = qs.length ? '' : 'none';
+      $('conclQ').innerHTML = qs.map(x => `<li>${escapeHtml(x)}</li>`).join(''); $('conclArch').innerHTML = '';
+      return;
+    }
+    const aimKey = P.dir === 'high' ? hiKey : loKey, othKey = other(aimKey);
+    const aim = lbl(aimKey), oth = lbl(othKey);
+    const aimSign = aimKey === 'b' ? 1 : -1;
+    const lines = [];
+    if (P.extra.includes('Theta') && fi.theta !== null) lines.push(T.extraTheta(aim, oth, Math.exp(aimSign * fi.theta)));
+    if (P.extra.includes('Delta') && fi.delta !== null) lines.push(T.extraDelta(aim, oth, Math.exp(aimSign * fi.delta)));
+    extra = lines.join(' / ');
+    if (P.extra.includes('Delta') && fi.delta !== null) $('conclExtraNote').textContent = T.deltaNote;
+    if (subj === aimKey) {
+      meaning = T.match(aim, X.name, photo, ph);
+      qs = (pid === 'sleep' ? X.q : [X.q[0]]).slice(); qs[0] = T.matchQ(qs[0]);
+    } else if (subj === othKey) {
+      meaning = T.mismatch(aim, oth, X.feel, photo, ph, during);
+      qs = T.mmQ(aim, oth, X.feel, AX[0], P.dir === 'high'); arch = 'reason'; archPick = oth;
+    } else if (subj === 'none') { meaning = T.unaware(aim, photo, ph, during); qs = T.unawareQ; }
+    else { meaning = T.meaning(aim, X.name, X.feel, T.grpOf[P.group]); qs = (pid === 'sleep' ? X.q : [X.q[0]]); arch = 'lead'; }
+  } else {
+    head = T.sameHead(X.name);
+    if (subj === 'a' || subj === 'b') { meaning = T.sameSubj(lbl(subj), X.feel, photo, ph, during); qs = T.sameSubjQ(lbl(subj), X.feel, X.name); }
+    else if (subj === 'none') { meaning = T.sameNoneSubj(during); qs = T.sameNoneSubjQ; }
+    else { meaning = T.sameNone(X.name); qs = T.sameQ(X.name); }
+  }
+  $('conclNote').textContent = noteTxt; $('conclHead').textContent = head; $('conclExtra').textContent = extra; $('conclBody').textContent = bodyLine(r, bodyHi);
+  $('conclIntro').textContent = intro; $('conclMeaning').textContent = meaning;
+  $('conclQTitle').textContent = qs.length ? t('conclQTitle') : '';
+  $('conclPink').style.display = (qs.length || arch) ? '' : 'none';
+  $('conclQ').innerHTML = qs.map(x => `<li>${escapeHtml(x)}</li>`).join('');
+
+  if (arch) {
+    const items = T.archEx(AX[0], X.feel);
+    let h = `<span class="al">${escapeHtml(T.archLab)}</span>${items.map((x, i) => `<div class="arch-step"><b>${escapeHtml(T.stepLab(i + 1))}</b><span>${escapeHtml(x)}</span></div>`).join('')}`;
+    if (photo) h += `<p class="arch-photo">${escapeHtml(T.archPhoto)}</p>`;
+    $('conclArch').innerHTML = h;
+  } else $('conclArch').innerHTML = '';
+}
+
+/* ---------- からだの反応(心拍・頭の動き) ----------
+ * 心拍: Muse 2の額の光センサー(PPG)から拍の間隔を求め、ブロックごとの平均心拍(bpm)を出す。
+ * 頭の動き: ジャイロの角速度(°/s)の大きさの平均。ブロックごとに、静止時のずれ(中央値)を引いてから計算する。
+ * どちらも脳波の判定には使わず、データの項と結論カードの補助として表示する。 */
+const HR_MIN_BEATS = 8;
+const BODY_HR_NOTICE = 2;                 // bpm。これ未満の差は「ほぼ同じ」とみなす目安
+const BODY_MOTION_NOTICE = Math.log(1.2); // ±20%未満は「ほぼ同じ」とみなす目安
+
+function movingAvg(x, w) {
+  const n = x.length, out = new Float64Array(n), cs = new Float64Array(n + 1);
+  for (let i = 0; i < n; i++) cs[i + 1] = cs[i] + x[i];
+  const h = Math.max(1, Math.floor(w / 2));
+  for (let i = 0; i < n; i++) {
+    const lo = Math.max(0, i - h), hi = Math.min(n - 1, i + h);
+    out[i] = (cs[hi + 1] - cs[lo]) / (hi - lo + 1);
+  }
+  return out;
+}
+
+function peakIntervals(x, sign, fs) {
+  const n = x.length;
+  let ss = 0;
+  for (let i = 0; i < n; i++) ss += x[i] * x[i];
+  const sd = Math.sqrt(ss / n);
+  if (!(sd > 0)) return null;
+  const minDist = Math.round(fs * 0.4), thr = 0.4 * sd;
+  const peaks = [];
+  for (let i = 1; i < n - 1; i++) {
+    const v = sign * x[i];
+    if (v > thr && v >= sign * x[i - 1] && v > sign * x[i + 1]) {
+      if (!peaks.length || i - peaks[peaks.length - 1] >= minDist) peaks.push(i);
+      else if (v > sign * x[peaks[peaks.length - 1]]) peaks[peaks.length - 1] = i;
+    }
+  }
+  const ok = [];
+  for (let k = 1; k < peaks.length; k++) {
+    const d = (peaks[k] - peaks[k - 1]) / fs;
+    if (d >= 0.33 && d <= 1.5) ok.push(d);
+  }
+  if (ok.length < HR_MIN_BEATS) return null;
+  const sorted = ok.slice().sort((p, q) => p - q), med = sorted[Math.floor(sorted.length / 2)];
+  const kept = ok.filter(v => Math.abs(v - med) <= 0.25 * med);
+  if (kept.length < HR_MIN_BEATS) return null;
+  const mean = kept.reduce((p, q) => p + q, 0) / kept.length;
+  const sdI = Math.sqrt(kept.reduce((p, q) => p + (q - mean) * (q - mean), 0) / kept.length);
+  return { bpm: 60 / mean, cv: sdI / mean, beats: kept.length + 1 };
+}
+
+function heartRateOf(ppg, fs, seconds) {
+  if (!ppg || ppg.length < Math.max(fs * 10, fs * seconds * 0.85)) return null;
+  const sm = movingAvg(ppg, Math.round(fs * 0.12));
+  const base = movingAvg(ppg, Math.round(fs * 1.0));
+  const x = new Float64Array(ppg.length);
+  for (let i = 0; i < ppg.length; i++) x[i] = sm[i] - base[i];
+  // 反射型の光センサーでは波の向きが逆になることがあるため、両方向で試し、拍の間隔がそろう方を採用する
+  const c = [1, -1].map(sg => peakIntervals(x, sg, fs)).filter(Boolean).filter(r => r.cv <= 0.2);
+  if (!c.length) return null;
+  c.sort((p, q) => p.cv - q.cv);
+  // ノイズを拍と誤検出していないか: 拍の間隔だけずらした波形が、元の波形とよく似ているか(自己相関)を確かめる
+  if (beatPeriodicity(x, fs, 60 / c[0].bpm) < 0.4) return null;
+  return c[0];
+}
+
+// 拍の間隔(秒)の前後±15%のずらし幅での、正規化した自己相関の最大値(0〜1。規則的な拍なら高い)
+function beatPeriodicity(x, fs, ibi) {
+  const n = x.length;
+  let mean = 0;
+  for (let i = 0; i < n; i++) mean += x[i];
+  mean /= n;
+  let den = 0;
+  for (let i = 0; i < n; i++) den += (x[i] - mean) * (x[i] - mean);
+  if (!(den > 0)) return 0;
+  const lo = Math.max(1, Math.round(fs * ibi * 0.85)), hi = Math.round(fs * ibi * 1.15);
+  let best = 0;
+  for (let lag = lo; lag <= hi && lag < n; lag++) {
+    let num = 0;
+    for (let i = 0; i + lag < n; i++) num += (x[i] - mean) * (x[i + lag] - mean);
+    best = Math.max(best, num / den);
+  }
+  return best;
+}
+
+function motionOf(gyro) {
+  if (!gyro || gyro.length < 30) return null;
+  const med = (k) => { const v = gyro.map(g => g[k]).sort((p, q) => p - q); return v[Math.floor(v.length / 2)]; };
+  const m = [med(0), med(1), med(2)];
+  let sum = 0;
+  for (const g of gyro) sum += Math.hypot(g[0] - m[0], g[1] - m[1], g[2] - m[2]);
+  return sum / gyro.length;
+}
+
+function calculateBody(list, sensors, seconds) {
+  const hrBlocks = [], mvBlocks = [];
+  (list || []).forEach(b => {
+    const h = heartRateOf(b.ir, PPG_RATE, seconds) || heartRateOf(b.red, PPG_RATE, seconds);
+    hrBlocks.push(h ? +h.bpm.toFixed(1) : null);
+    const m = motionOf(b.gyro);
+    mvBlocks.push(m === null ? null : +m.toFixed(2));
+  });
+  const hv = hrBlocks.filter(v => v !== null), mv = mvBlocks.filter(v => v !== null);
+  const avg = (a) => a.reduce((p, q) => p + q, 0) / a.length;
+  return {
+    sensors: { ppg: !!(sensors && sensors.ppg), imu: !!(sensors && sensors.imu) },
+    hr: hv.length ? { bpm: +avg(hv).toFixed(1), blocks: hrBlocks, valid: hv.length, total: hrBlocks.length } : null,
+    motion: mv.length ? { dps: +avg(mv).toFixed(2), blocks: mvBlocks, valid: mv.length, total: mvBlocks.length } : null,
+  };
+}
+
+function bodyVal(o, k, f) { return (o && o[k] && o[k][f] !== undefined) ? o[k][f] : null; }
+
+// A と B の差(B − A)と、どちらが大きいか
+function bodyDiff(r) {
+  const hrA = bodyVal(r.a.body, 'hr', 'bpm'), hrB = bodyVal(r.b.body, 'hr', 'bpm');
+  const mvA = bodyVal(r.a.body, 'motion', 'dps'), mvB = bodyVal(r.b.body, 'motion', 'dps');
+  let hr = null, mv = null;
+  if (hrA !== null && hrB !== null) { const d = hrB - hrA; hr = { d, high: Math.abs(d) < BODY_HR_NOTICE ? null : (d > 0 ? 'b' : 'a') }; }
+  if (mvA > 0 && mvB > 0) { const ratio = mvB / mvA; mv = { ratio, factor: Math.max(ratio, 1 / ratio), more: Math.abs(Math.log(ratio)) < BODY_MOTION_NOTICE ? null : (ratio > 1 ? 'b' : 'a') }; }
+  return { hr, mv };
+}
+
+function renderBody(r) {
+  const blk = document.getElementById('bodyBlock'), el = document.getElementById('bodyTable');
+  if (!blk || !el) return;
+  if (!r.a.body && !r.b.body) { blk.style.display = 'none'; return; }
+  blk.style.display = '';
+  const diff = bodyDiff(r);
+  const lab = (k) => r[k].label;
+  const fmt = (v, d) => v === null ? '—' : v.toFixed(d);
+  const blocksTxt = (o, k) => (o && o[k]) ? o[k].blocks.map(v => v === null ? '—' : v).join(' / ') : '';
+  const cell = (v, d, o, k) => `<td><div class="va">${fmt(v, d)}</div><div class="vr">${escapeHtml(t('bodyBlocksLab'))}: ${escapeHtml(blocksTxt(o, k) || '—')}</div></td>`;
+  let hrDiffTxt = '—', mvDiffTxt = '—';
+  if (diff.hr) hrDiffTxt = diff.hr.high ? t('bodyHrHigher')(lab(diff.hr.high), Math.abs(diff.hr.d)) : t('bodySame');
+  if (diff.mv) mvDiffTxt = diff.mv.more ? t('bodyMoreMotion')(lab(diff.mv.more), diff.mv.factor) : t('bodySame');
+  const hrA = bodyVal(r.a.body, 'hr', 'bpm'), hrB = bodyVal(r.b.body, 'hr', 'bpm');
+  const mvA = bodyVal(r.a.body, 'motion', 'dps'), mvB = bodyVal(r.b.body, 'motion', 'dps');
+  el.innerHTML = `<table class="data-table"><thead><tr><th>${escapeHtml(t('bodyColMetric'))}</th><th>${escapeHtml(r.a.label)}</th><th>${escapeHtml(r.b.label)}</th><th>${escapeHtml(t('bodyColDiff'))}</th></tr></thead><tbody>`
+    + `<tr><th>${escapeHtml(t('bodyHrName'))}</th>${cell(hrA, 1, r.a.body, 'hr')}${cell(hrB, 1, r.b.body, 'hr')}<td>${escapeHtml(hrDiffTxt)}</td></tr>`
+    + `<tr><th>${escapeHtml(t('bodyMotionName'))}</th>${cell(mvA, 1, r.a.body, 'motion')}${cell(mvB, 1, r.b.body, 'motion')}<td>${escapeHtml(mvDiffTxt)}</td></tr>`
+    + `</tbody></table>`;
+}
+
+// 結論カードの補助。hiKey: 前頭部の覚醒が高かった側('a'|'b'|null)
+function bodyLine(r, hiKey) {
+  if (!r.a.body && !r.b.body) return '';
+  const diff = bodyDiff(r);
+  const lab = (k) => r[k].label;
+  const lines = [];
+  if (diff.hr) {
+    if (!diff.hr.high) lines.push(t('bodyLnHrSame'));
+    else {
+      let l = t('bodyLnHr')(lab(diff.hr.high), Math.abs(diff.hr.d));
+      if (hiKey) l += (diff.hr.high === hiKey ? t('bodyLnAgree')(lab(hiKey)) : t('bodyLnSplit')(lab(hiKey)));
+      lines.push(l);
+    }
+  }
+  if (diff.mv) lines.push(diff.mv.more ? t('bodyLnMv')(lab(diff.mv.more), diff.mv.factor) : t('bodyLnMvSame'));
+  return lines.length ? t('bodyLnPrefix') + '\n' + lines.join('\n') : '';
+}
+
+function renderDataTable(r){
+  const el = document.getElementById('dataTable');
+  if (!r.a.power || !r.b.power) { el.innerHTML = ''; return; }
+  const fmt = (v) => (v > 0 ? (v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2)) : null);
+  const head = CHANNEL_ORDER.map(ch => `<th>${CHANNEL_LABELS[ch]}</th>`).join('');
+  const rows = Object.keys(BANDS).map(band => {
+    const cells = CHANNEL_ORDER.map((ch, i) => {
+      const pa = r.a.power[band] ? r.a.power[band][i] : null, pb = r.b.power[band] ? r.b.power[band][i] : null;
+      const fa = fmt(pa), fb = fmt(pb);
+      if (fa === null || fb === null) return '<td class="na">—</td>';
+      return `<td><div class="va">${escapeHtml(r.a.label)}: ${fa}</div><div class="vb">${escapeHtml(r.b.label)}: ${fb}</div><div class="vr">(${Math.round((pb / pa) * 100)}%)</div></td>`;
+    }).join('');
+    return `<tr><th>${band}</th>${cells}</tr>`;
+  }).join('');
+  el.innerHTML = `<table class="data-table"><thead><tr><th>${escapeHtml(t('tblBand'))}</th>${head}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function renderDetailPanels(r){
+  renderSettings(r);
+  renderConclusion(r);
+  renderDataTable(r);
+  renderQuality(r);
+  renderBody(r);
+  renderBrainMap(r);
+  document.getElementById('rawLabelA').textContent = r.a.label;
+  document.getElementById('rawLabelB').textContent = r.b.label;
+  const okA = drawRawLanes('rawSvgA', r.a);
+  const okB = drawRawLanes('rawSvgB', r.b);
+  if (!okA) document.getElementById('rawLabelA').textContent += t('noDataSuffix');
+  if (!okB) document.getElementById('rawLabelB').textContent += t('noDataSuffix');
+  const anyRejected = [r.a, r.b].some(x => x.raw && x.raw.rejected);
+  document.getElementById('rawLegend').style.display = anyRejected ? 'flex' : 'none';
+}
+
+function showDetail(r){
+  currentDetail = r;
+  showScreen('detail');
+  document.getElementById('detailTitle').textContent =
+    (r.title ? r.title + ' — ' : '') + `${r.a.label} / ${r.b.label} — ${r.timestamp}`;
+
+  destroyCharts();
+  renderDetailPanels(r);   // 生波形(SVG)・品質表・脳マップはChart.jsが無くても表示できる
+
+  const fallback = document.getElementById('chartFallback');
+  document.getElementById('psdLabelA').textContent = r.a.label;
+  document.getElementById('psdLabelB').textContent = r.b.label;
+  if (typeof Chart === 'undefined') {
+    fallback.style.display = 'block';
+    fallback.textContent = t('chartFallback');
+    return;
+  }
+  fallback.style.display = 'none';
+
+  // 新方式(ノイズ除去あり)で保存された結果は µV²/Hz、旧形式の結果は任意単位のためPowerのまま表示
+  const powerUnit = (r.a.quality && r.b.quality) ? 'Power (µV²/Hz)' : 'Power';
+
+  // ② PSD
+  if (r.a.psd && r.b.psd) {
+    const psdSeriesA = CHANNEL_ORDER.map(ch => ({ label: CHANNEL_LABELS[ch], data: r.a.psd[ch] || [], color: CHANNEL_COLORS[ch] }));
+    const psdSeriesB = CHANNEL_ORDER.map(ch => ({ label: CHANNEL_LABELS[ch], data: r.b.psd[ch] || [], color: CHANNEL_COLORS[ch] }));
+    buildLineChart('chartPsdA', r.a.psd.freqs || [], psdSeriesA, powerUnit, { bands: true });
+    buildLineChart('chartPsdB', r.b.psd.freqs || [], psdSeriesB, powerUnit, { bands: true });
+  } else {
+    document.getElementById('psdLabelA').textContent += t('noDataSuffix');
+    document.getElementById('psdLabelB').textContent += t('noDataSuffix');
+  }
+
+  // ③ Band Power(周波数帯ごと × チャンネルごと の Room A vs Room B 比較)
+  const chLabels = CHANNEL_ORDER.map(ch => CHANNEL_LABELS[ch]);
+  Object.keys(BANDS).forEach(band => {
+    const canvas = document.getElementById('chartBand' + band);
+    if (!canvas) return;
+    const dataA = (r.a.power && r.a.power[band]) || [];
+    const dataB = (r.b.power && r.b.power[band]) || [];
+    const bandChart = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: chLabels,
+        datasets: [
+          { label: r.a.label, data: dataA, backgroundColor: 'rgba(32,201,214,0.55)' },
+          { label: r.b.label, data: dataB, backgroundColor: 'rgba(214,38,201,0.55)' }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } } },
+        scales: {
+          x: { ticks: { font: { size: 10 } } },
+          y: { ticks: { font: { size: 10 } }, title: { display: true, text: powerUnit, font: { size: 10 } } }
+        }
+      }
+    });
+    chartInstances.push(bandChart);
+  });
+}
+
+/* ---------- 測定の流れ ---------- */
+
+class MeasureAbort extends Error { constructor(){ super('abort'); this.name = 'MeasureAbort'; } }
+
+function clampInt(v, lo, hi, dflt){
+  const n = Math.round(Number(v));
+  if (!Number.isFinite(n)) return dflt;
+  return Math.max(lo, Math.min(hi, n));
+}
+
+// 空間A/Bの順番: 1回目 A→B、2回目 B→A、3回目 A→B…(順序効果・時間経過による慣れを均等にならす)
+function buildOrder(rounds){
+  const order = [];
+  for (let r = 0; r < rounds; r++) order.push(...(r % 2 === 0 ? ['a', 'b'] : ['b', 'a']));
+  return order;
+}
+
+function startFromRegister(){
+  const errEl = document.getElementById('registerError');
+  errEl.textContent = '';
+  if (!selectedPurpose) { errEl.textContent = t('purposePickError'); return; }
+  const labelA = (document.getElementById('labelA').value || '').trim() || 'Room A';
+  const labelB = (document.getElementById('labelB').value || '').trim() || 'Room B';
+  const seconds = clampInt(document.getElementById('measureSec').value, 10, 300, 30);
+  const rounds = clampInt(document.getElementById('measureRounds').value, 1, 6, 3);
+  document.getElementById('measureSec').value = seconds;
+  document.getElementById('measureRounds').value = rounds;
+  session = {
+    purpose: selectedPurpose, view: selectedView,
+    title: (document.getElementById('sessionTitle').value || '').trim(),
+    a: { label: labelA, description: (document.getElementById('descA').value || '').trim() },
+    b: { label: labelB, description: (document.getElementById('descB').value || '').trim() },
+    seconds, rounds, order: buildOrder(rounds),
+  };
+  startMeasurement();
+}
+
+function setMeasureTimer(v){ document.getElementById('measureTimer').textContent = v; }
+
+function runCountdown(seconds, onTick){
+  const token = measureToken;
+  return new Promise((resolve, reject) => {
+    let remaining = seconds;
+    onTick(remaining);
+    countdownTimer = setInterval(() => {
+      if (token !== measureToken) { clearInterval(countdownTimer); reject(new MeasureAbort()); return; }
+      remaining -= 1;
+      onTick(remaining);
+      if (remaining <= 0){ clearInterval(countdownTimer); resolve(); }
+    }, 1000);
+  });
+}
+
+// 「測定開始」ボタンが押されるまで待つ(実際の空間や別の端末で写真を見る準備ができたら押す)
+function waitForStart(){
+  const token = measureToken;
+  document.getElementById('measureStartBtn').style.display = 'inline-block';
+  return new Promise((resolve, reject) => {
+    measureWaiter = { resolve: () => { measureWaiter = null; resolve(); }, reject };
+    if (token !== measureToken) { measureWaiter = null; reject(new MeasureAbort()); }
+  });
+}
+
+function confirmStart(){
+  document.getElementById('measureStartBtn').style.display = 'none';
+  if (measureWaiter) measureWaiter.resolve();
+}
+
+function hideSubjAsk(){ const b = document.getElementById('subjAsk'); if (b) b.style.display = 'none'; const h = document.getElementById('measureHint'); if (h) h.style.display = ''; }
+
+// 測定の最後に、結果を見る前に感想を必ず聞く
+function askSubj(S){
+  const token = measureToken, X = PURPOSES[S.purpose][langKey()];
+  const box = document.getElementById('subjAsk');
+  document.getElementById('measureLabel').textContent = t('subjAskFn')(X.feel);
+  document.getElementById('measureSub').textContent = '';
+  document.getElementById('measureDesc').textContent = '';
+  document.getElementById('measureProgress').textContent = '';
+  document.getElementById('measureSampleCount').textContent = '';
+  setMeasureTimer('');
+  document.getElementById('subjAskNote').textContent = t('subjAskNote');
+  const btnsEl = document.getElementById('subjAskBtns');
+  btnsEl.innerHTML = [['a', S.a.label], ['b', S.b.label], ['none', t('subjNone')]].map(x => `<button type="button" class="subj-btn" data-subj="${x[0]}">${escapeHtml(x[1])}</button>`).join('');
+  box.style.display = 'block';
+  document.getElementById('measureHint').style.display = 'none';
+  return new Promise((resolve, reject) => {
+    measureWaiter = { resolve: () => {}, reject };
+    btnsEl.querySelectorAll('.subj-btn').forEach(b => b.onclick = () => { measureWaiter = null; hideSubjAsk(); resolve(b.dataset.subj); });
+    if (token !== measureToken) { measureWaiter = null; reject(new MeasureAbort()); }
+  });
+}
+
+function abortMeasurement(){
+  hideSubjAsk();
+  measureToken++;
+  clearInterval(countdownTimer);
+  if (measureWaiter) { const w = measureWaiter; measureWaiter = null; w.reject(new MeasureAbort()); }
+  if (muse) { try { muse.disconnect(); } catch(e){} muse = null; }
+  document.getElementById('connectBtn').textContent = t('btnConnect');
+  document.getElementById('connectStatus').textContent = '';
+  document.getElementById('measureStartBtn').style.display = 'none';
+  showScreen('menu');
+}
+
+// 測定の前の接触確認: 直近の波形を1秒ごとに区切り、使える窓の割合を出す(測定後の品質表と同じ基準)
+function liveQuality(x){
+  const n = SAMPLE_RATE;
+  if (!x || x.length < n * 2) return null;
+  const E = Math.min(6, Math.floor(x.length / n));
+  let ok = 0;
+  const ptps = [];
+  const xh = zeroPhaseHighpass(Float64Array.from(x), HP_HZ);
+  for (let e = 0; e < E; e++) {
+    let mn = Infinity, mx = -Infinity;
+    for (let i = xh.length - (e + 1) * n; i < xh.length - e * n; i++) { if (xh[i] < mn) mn = xh[i]; if (xh[i] > mx) mx = xh[i]; }
+    const ptp = mx - mn;
+    ptps.push(ptp);
+    if (ptp >= FLAT_LIMIT_UV && ptp <= PTP_LIMIT_UV) ok++;
+  }
+  const rate = ok / E;
+  let rmn = Infinity, rmx = -Infinity;
+  for (let i = x.length - E * n; i < x.length; i++) { if (x[i] < rmn) rmn = x[i]; if (x[i] > rmx) rmx = x[i]; }
+  return { rate, status: rate >= 0.6 ? 'good' : rate >= 0.3 ? 'fair' : 'poor', amp: median(ptps), rawRange: rmx - rmn };
+}
+
+let waveMode = 'raw';   // 'hp' = ドリフトを除いた波形(判定に使う) / 'raw' = 生の値(平均を引いたもの)
+function drawLiveWave(){
+  const cv = document.getElementById('signalWave');
+  if (!cv || !muse || !muse.live) return;
+  const ctx = cv.getContext('2d'), W = cv.width, H = cv.height, lane = H / 4, SHOW = SAMPLE_RATE * 4, SCALE = 150;
+  ctx.clearRect(0, 0, W, H);
+  ctx.font = '13px sans-serif';
+  CHANNEL_ORDER.forEach((ch, k) => {
+    const buf = muse.live[ch], top = k * lane, mid = top + lane / 2;
+    ctx.strokeStyle = 'rgba(100,90,120,0.18)'; ctx.lineWidth = 1;
+    [-100, 0, 100].forEach(v => { const y = mid - v / SCALE * (lane * 0.42); ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); });
+    ctx.fillStyle = '#6a6475'; ctx.fillText(CHANNEL_LABELS[ch], 6, top + 16);
+    if (!buf || buf.length < SAMPLE_RATE) return;
+    let y;
+    if (waveMode === 'hp') { const f = zeroPhaseHighpass(Float64Array.from(buf), HP_HZ); y = f.subarray(Math.max(0, f.length - SHOW)); }
+    else { const seg = buf.slice(Math.max(0, buf.length - SHOW)); let m = 0; for (const v of seg) m += v; m /= seg.length; y = seg.map(v => v - m); }
+    ctx.beginPath(); ctx.lineWidth = 1.2; ctx.strokeStyle = '#3b6fb6';
+    for (let i = 0; i < y.length; i++) {
+      const px = (i / (SHOW - 1)) * W + (SHOW - y.length) / (SHOW - 1) * W;
+      const v = Math.max(-SCALE * 1.15, Math.min(SCALE * 1.15, y[i]));
+      const py = mid - v / SCALE * (lane * 0.42);
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+  });
+}
+function renderWaveModes(){
+  const shown = document.getElementById('waveWrap').style.display !== 'none';
+  document.getElementById('waveToggle').textContent = t(shown ? 'waveHide' : 'waveShow');
+  document.getElementById('waveScale').textContent = t('waveScale');
+}
+function toggleWave(){
+  const w = document.getElementById('waveWrap');
+  w.style.display = w.style.display === 'none' ? 'block' : 'none';
+  renderWaveModes(); drawLiveWave();
+}
+
+async function signalCheck(){
+  if (!muse || !muse.live) return;
+  const box = document.getElementById('signalCheck'), btn = document.getElementById('measureStartBtn');
+  document.getElementById('measureLabel').textContent = t('checkTitle');
+  document.getElementById('measureSub').textContent = t('checkSub');
+  document.getElementById('measureDesc').textContent = '';
+  document.getElementById('measureProgress').textContent = '';
+  document.getElementById('measureSampleCount').textContent = '';
+  setMeasureTimer('');
+  document.getElementById('measureHint').style.display = 'none';
+  btn.textContent = t('checkNext');
+  box.style.display = 'block';
+  let lastCount = muse.eegCount, lastChange = performance.now();
+  const statusKey = { good: 'qualityGood', fair: 'qualityFair', poor: 'qualityPoor' };
+  const update = () => {
+    if (!muse) return;
+    if (muse.eegCount !== lastCount) { lastCount = muse.eegCount; lastChange = performance.now(); }
+    const stalled = performance.now() - lastChange > 2500;
+    const q = {}; CHANNEL_ORDER.forEach(ch => { q[ch] = liveQuality(muse.live[ch]); });
+    const huge = CHANNEL_ORDER.filter(ch => q[ch] && q[ch].rawRange > 800).length >= 2;   // 4chのうち2ch以上が、測れる幅(約±1000µV)に張り付いている
+    const head = CHANNEL_ORDER.map(ch => `<th>${CHANNEL_LABELS[ch]}</th>`).join('');
+    const cells = CHANNEL_ORDER.map(ch => q[ch]
+      ? `<td class="q-${q[ch].status}"><span class="q-pct">${Math.round(q[ch].rate * 100)}%</span><span class="q-st">${escapeHtml(t(statusKey[q[ch].status]))}</span></td>`
+      : '<td>—</td>').join('');
+    document.getElementById('signalTable').innerHTML = `<table class="quality-table"><thead><tr>${head}</tr></thead><tbody><tr>${cells}</tr></tbody></table>`;
+    const batEl = document.getElementById('signalBattery');
+    if (muse.battery == null) { batEl.textContent = ''; batEl.className = 'sc-hint'; }
+    else {
+      const low = muse.battery < BATTERY_LOW;
+      batEl.className = 'sc-hint' + (low ? ' bad' : '');
+      batEl.textContent = low ? t('batteryLow')(muse.battery) : t('batteryNow')(muse.battery);
+    }
+    const hint = document.getElementById('signalHint');
+    const frontalOk = ['af7', 'af8'].every(ch => q[ch] && q[ch].status === 'good');
+    hint.className = 'sc-hint' + (stalled ? ' bad' : '');
+    if (/[?&]debug=1/.test(location.search)) {
+      const lp = muse.lastPkt || {};
+      let dbg = document.getElementById('dbgBox');
+      if (!dbg) {
+        dbg = document.createElement('div'); dbg.id = 'dbgBox'; dbg.style.cssText = 'font-size:11px;text-align:center;margin:6px 0';
+        dbg.innerHTML = '<div id="dbgBtns"></div><div id="dbgTxt" style="white-space:pre-wrap;margin-top:6px"></div>';
+        hint.parentNode.insertBefore(dbg, hint);
+        ['p21','p20','p22','p23','p50','p51','p61','p1034','p1035'].forEach(pr => {
+          const b = document.createElement('button'); b.textContent = pr; b.style.cssText = 'margin:2px;padding:4px 8px';
+          b.onclick = async () => {
+            try {
+              for (const c of ['h', pr, 's', 'd']) await muse.controlChar.writeValue(encodeCommand(c));
+              muse.dbgPreset = pr;
+            } catch (e) { muse.dbgPreset = pr + ' 失敗: ' + e.message; }
+          };
+          dbg.firstChild.appendChild(b);
+        });
+      }
+      const v = muse.live.af7.slice(-256); let jump = 0;
+      for (let i = 1; i < v.length; i++) jump += Math.abs(v[i] - v[i-1]);
+      jump = v.length > 1 ? jump / (v.length - 1) : 0;
+      document.getElementById('dbgTxt').textContent = 'preset: ' + (muse.dbgPreset || '(自動)') + '\n隣との差の平均(小さいほど滑らか): ' + jump.toFixed(0) + ' µV\npkt AF7: ' + (lp.af7 || '-') + '\nraw AF7: ' + v.slice(-6).map(x => x.toFixed(0)).join(', ');
+      hint.textContent = '';
+      return;
+    }
+    if (false) { const lp = muse.lastPkt || {}; hint.style.whiteSpace = 'pre-wrap'; hint.style.fontSize = '11px'; hint.textContent = 'pkt AF7: ' + (lp.af7 || '-') + '\npkt AF8: ' + (lp.af8 || '-') + '\nraw AF7: ' + (muse.live.af7.slice(-6).map(v => v.toFixed(0)).join(', ')); return; }
+    const earsBad = ['tp9', 'tp10'].some(ch => !q[ch] || q[ch].status !== 'good');
+    hint.textContent = stalled ? t('checkNoSignal') : !q.af7 || !q.af8 ? t('checkWaiting') : (frontalOk && earsBad) ? t('checkEars') : huge ? t('checkHuge') : frontalOk ? '' : t('checkHint');
+  };
+  renderWaveModes();
+  document.getElementById('waveWrap').style.display = 'block'; renderWaveModes();
+  artStartLive();
+  const iv = setInterval(update, 500);
+  const ivw = setInterval(drawLiveWave, 200);
+  update(); drawLiveWave();
+  try { await waitForStart(); }
+  finally { clearInterval(iv); clearInterval(ivw); artStopLive(); box.style.display = 'none'; btn.textContent = t('btnMeasureStart'); document.getElementById('measureHint').style.display = ''; }
+}
+
+async function startMeasurement(){
+  if (!session){
+    document.getElementById('registerError').textContent = t('needRegisterFirst');
+    return;
+  }
+  const myToken = ++measureToken;
+  const S = session;
+  const total = S.order.length;
+  const blocks = { a: [], b: [] };
+  const bodyBlocks = { a: [], b: [] };
+  let sensorsUsed = { ppg: false, imu: false };
+
+  showScreen('measuring');
+  hideSubjAsk();
+  document.getElementById('measureError').textContent = '';
+  document.getElementById('measureSampleCount').textContent = '';
+  document.getElementById('measureStartBtn').style.display = 'none';
+  document.getElementById('measureProgress').textContent = '';
+  document.getElementById('measureDesc').textContent = '';
+  document.getElementById('measureLabel').textContent = t('measurePreparing');
+  setMeasureTimer('--');
+
+  try {
+    const alreadyConnected = muse && muse.gatt && muse.gatt.connected;
+    if (!alreadyConnected) {
+      document.getElementById('measureSub').textContent = t('museSearching');
+      muse = new MuseClient();
+      await muse.connect();
+      await muse.startStreaming();
+    }
+    if (myToken !== measureToken) throw new MeasureAbort();
+    sensorsUsed = Object.assign({}, muse.sensors || sensorsUsed);
+    document.getElementById('measureSub').textContent = t('museConnected') + ' ' + t('sensorStatus')(sensorsUsed);
+
+    await signalCheck();
+    if (myToken !== measureToken) throw new MeasureAbort();
+
+    for (let i = 0; i < total; i++) {
+      const key = S.order[i];
+      const space = S[key];
+      document.getElementById('measureProgress').textContent = t('measureProgress')(i + 1, total, S.seconds);
+      document.getElementById('measureLabel').textContent = t('prepareRoom')(space.label);
+      document.getElementById('measureDesc').textContent = space.description || '';
+      document.getElementById('measureSampleCount').textContent = t('sensorStatus')(sensorsUsed);
+      setMeasureTimer(S.seconds);
+      document.getElementById('measureSub').textContent = t('measureReadySub');
+
+      await waitForStart();                       // 準備ができたらボタンを押す
+      await runCountdown(3, s => { setMeasureTimer(s); document.getElementById('measureSub').textContent = t('measureCountdownSub'); });
+
+      document.getElementById('measureLabel').textContent = t('watchRoom')(space.label);
+      document.getElementById('measureSub').textContent = t('measuring');
+      muse.startCapture();
+      const counter = setInterval(() => {
+        document.getElementById('measureSampleCount').textContent = t('receiving')(muse.buffers.tp9.length);
+      }, 300);
+      try {
+        await runCountdown(S.seconds, s => setMeasureTimer(s));
+      } finally {
+        clearInterval(counter);
+      }
+      const buf = muse.stopCapture();
+      bodyBlocks[key].push(muse.lastBody);
+      if (buf.tp9.length === 0) document.getElementById('measureSampleCount').textContent = t('noDataWarning');
+      blocks[key].push({ tp9: buf.tp9.slice(), af7: buf.af7.slice(), af8: buf.af8.slice(), tp10: buf.tp10.slice() });
+    }
+
+    await muse.stopStreaming();
+    muse.disconnect();
+    muse = null;
+    document.getElementById('connectBtn').textContent = t('btnConnect');
+    document.getElementById('connectStatus').textContent = '';
+
+    const subjAnswer = await askSubj(S);
+    if (myToken !== measureToken) throw new MeasureAbort();
+
+    document.getElementById('measureLabel').textContent = t('analyzing');
+    document.getElementById('measureSub').textContent = '';
+    document.getElementById('measureDesc').textContent = '';
+    document.getElementById('measureProgress').textContent = '';
+    setMeasureTimer('--');
+
+    const analysisA = calculateFullAnalysis(blocks.a);
+    const analysisB = calculateFullAnalysis(blocks.b);
+    const bodyA = calculateBody(bodyBlocks.a, sensorsUsed, S.seconds);
+    const bodyB = calculateBody(bodyBlocks.b, sensorsUsed, S.seconds);
+    const settings = { seconds: S.seconds, rounds: S.rounds, order: S.order.map(x => x.toUpperCase()).join('') };
+
+    const payload = {
+      purpose: S.purpose, view_mode: S.view, subj: subjAnswer,
+      title: S.title,
+      label_a: S.a.label, label_b: S.b.label,
+      description_a: S.a.description, description_b: S.b.description,
+      settings,
+      power_a: analysisA.power, power_b: analysisB.power,
+      psd_a: analysisA.psd, psd_b: analysisB.psd,
+      raw_a: analysisA.raw, raw_b: analysisB.raw,
+      quality_a: analysisA.quality, quality_b: analysisB.quality,
+      body_a: bodyA, body_b: bodyB,
+      channels: CHANNEL_ORDER,
+    };
+
+    // サーバーに保存できなくても(旧版app.pyなど)、今回の結果はその場で表示できるようにする
+    let result = null;   // 静的サイト版: サーバーには送らない
+    const local = {
+      id: 'local', timestamp: new Date().toISOString().slice(0, 19).replace('T', ' '), title: S.title, purpose: S.purpose, view_mode: S.view, subj: subjAnswer, settings,
+      a: { label: S.a.label, description: S.a.description, power: analysisA.power, psd: analysisA.psd, raw: analysisA.raw, quality: analysisA.quality, body: bodyA },
+      b: { label: S.b.label, description: S.b.description, power: analysisB.power, psd: analysisB.psd, raw: analysisB.raw, quality: analysisB.quality, body: bodyB },
+    };
+    local.id = 'r' + Date.now();
+    try { await idbPut(local); } catch (e) { document.getElementById('measureError').textContent = t('saveFail') + ': ' + (e.message || e); }
+    if (!result) { showDetail(local); return; }
+    // 旧版サーバーが落とす項目(タイトル・説明・設定・品質・新形式のraw)は手元の値で補う
+    result.title = result.title !== undefined ? result.title : local.title;
+    result.purpose = result.purpose || local.purpose;
+    result.view_mode = result.view_mode || local.view_mode;
+    result.subj = result.subj || local.subj;
+    result.settings = result.settings || local.settings;
+    ['a', 'b'].forEach(k => {
+      result[k].description = result[k].description !== undefined ? result[k].description : local[k].description;
+      if (!result[k].quality) result[k].quality = local[k].quality;
+      if (!result[k].body) result[k].body = local[k].body;
+      if (!result[k].raw || !result[k].raw.rejected) result[k].raw = local[k].raw;
+    });
+    showDetail(result);
+
+  } catch (e) {
+    if (e instanceof MeasureAbort || myToken !== measureToken) return;   // 中止ボタンで抜けたときはメニューに戻っているので何もしない
+    if (muse) { try { muse.disconnect(); } catch(_){} muse = null; }
+    document.getElementById('measureError').textContent =
+      t('measureErrorPrefix') + (e.message || e) + t('measureErrorSuffix');
+  }
+}
+</script>
+<div id="verStamp" style="position:fixed;left:8px;bottom:6px;font-size:10px;color:rgba(80,70,100,0.55);pointer-events:none;z-index:5;">v 11/23 21:25</div>
+</body>
+</html>
